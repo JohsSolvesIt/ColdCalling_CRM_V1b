@@ -31,8 +31,15 @@ const emailService = new EmailService();
 let dbInitialized = false;
 const initializeDb = async () => {
   if (!dbInitialized) {
-    await neonDbManager.initialize();
-    dbInitialized = true;
+    try {
+      console.log('🔌 Initializing database connection...');
+      await neonDbManager.initialize();
+      dbInitialized = true;
+      console.log('✅ Database initialized successfully');
+    } catch (error) {
+      console.error('❌ Database initialization failed:', error);
+      throw new Error(`Database initialization failed: ${error.message}`);
+    }
   }
 };
 
@@ -501,13 +508,26 @@ app.delete('/api/properties/:id', async (req, res) => {
 // Recommendations for agent (alias path expected by UI as "recommendations")
 app.get('/api/agents/:id/recommendations', async (req, res) => {
   try {
+    console.log(`📋 Fetching recommendations for agent ${req.params.id}`);
+    
+    // Ensure response is always JSON
+    res.setHeader('Content-Type', 'application/json');
+    
     await initializeDb();
     const { id } = req.params;
+    
+    if (!id) {
+      return res.status(400).json({ success: false, error: 'Agent ID is required' });
+    }
+    
     const recommendations = await neonDbManager.getRecommendationsForAgent(id);
-    res.json({ success: true, recommendations });
+    console.log(`📋 Found ${recommendations?.length || 0} recommendations for agent ${id}`);
+    
+    res.json({ success: true, recommendations: recommendations || [] });
   } catch (error) {
     console.error('Error fetching recommendations:', error);
-    res.status(500).json({ success: false, error: 'Failed to fetch recommendations' });
+    res.setHeader('Content-Type', 'application/json');
+    res.status(500).json({ success: false, error: 'Failed to fetch recommendations', details: error.message });
   }
 });
 

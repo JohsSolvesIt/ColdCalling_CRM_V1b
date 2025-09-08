@@ -39,14 +39,33 @@ const ReviewManagementModal = ({ isOpen, onClose, contact, onReviewsUpdated }) =
       
       console.log('📥 Fetching reviews from both sources...');
       
-      // Fetch from both the recommendations table AND agent data
-      const [recommendationsResponse, agentResponse] = await Promise.all([
-        fetch(`/api/agents/${contact.id}/recommendations`),
-        fetch(`/api/agents/${contact.id}`)
-      ]);
+      // Fetch from both the recommendations table AND agent data with proper error handling
+      const fetchWithErrorHandling = async (url) => {
+        try {
+          const response = await fetch(url);
+          if (!response.ok) {
+            console.error(`❌ HTTP error ${response.status} for ${url}`);
+            return { success: false, error: `HTTP ${response.status}` };
+          }
+          
+          const text = await response.text();
+          try {
+            return JSON.parse(text);
+          } catch (parseError) {
+            console.error(`❌ JSON parse error for ${url}:`, parseError);
+            console.error(`❌ Response text:`, text.substring(0, 200));
+            return { success: false, error: 'Invalid JSON response' };
+          }
+        } catch (fetchError) {
+          console.error(`❌ Fetch error for ${url}:`, fetchError);
+          return { success: false, error: fetchError.message };
+        }
+      };
       
-      const recommendationsData = await recommendationsResponse.json();
-      const agentData = await agentResponse.json();
+      const [recommendationsData, agentData] = await Promise.all([
+        fetchWithErrorHandling(`/api/agents/${contact.id}/recommendations`),
+        fetchWithErrorHandling(`/api/agents/${contact.id}`)
+      ]);
       
       console.log('📥 Recommendations API response:', recommendationsData);
       console.log('📥 Agent API response:', {
