@@ -599,18 +599,50 @@ app.get('/api/website/layouts', (req, res) => {
   }
 });
 
-app.post('/api/website/preview', (req, res) => {
+app.post('/api/website/preview', async (req, res) => {
   try {
-    const { theme, layout, content } = req.body;
-    // Return a simple preview response
-    res.json({
-      success: true,
-      preview: `<div>Preview for ${theme} theme with ${layout} layout</div>`,
-      timestamp: new Date().toISOString()
-    });
+    console.log('🎨 Website preview request received');
+    const { theme, layout, content, contact } = req.body;
+    
+    // Set proper headers for JSON response
+    res.setHeader('Content-Type', 'application/json');
+    
+    // In Netlify environment, we'll generate preview HTML directly and return it
+    // rather than trying to save files and serve them from a separate server
+    
+    const ModularWebsiteGenerator = require('../../modular-website-system/engines/ModularWebsiteGenerator');
+    const generator = new ModularWebsiteGenerator();
+    
+    // Generate the website HTML
+    const result = generator.generateWebsite(
+      contact || content || { name: 'Sample Agent', email: 'agent@example.com' },
+      layout || 'professional',
+      theme || 'modern-professional',
+      req.body
+    );
+    
+    if (result.success) {
+      // Return the preview HTML directly in the response
+      res.json({
+        success: true,
+        previewHtml: result.websiteHTML,
+        websiteUrl: `/preview/${Date.now()}.html`, // Placeholder URL for compatibility
+        timestamp: new Date().toISOString()
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: result.error || 'Failed to generate preview'
+      });
+    }
   } catch (error) {
     console.error('Error generating preview:', error);
-    res.status(500).json({ error: 'Failed to generate preview' });
+    res.setHeader('Content-Type', 'application/json');
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to generate preview',
+      details: error.message 
+    });
   }
 });
 

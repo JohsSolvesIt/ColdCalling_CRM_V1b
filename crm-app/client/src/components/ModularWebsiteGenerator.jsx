@@ -14,6 +14,16 @@ import PropertyManagementModal from './PropertyManagementModal';
  * - UI shows which contact the settings apply to with a badge and notice
  */
 
+// Helper function to get the correct base URL for website previews
+const getBaseUrl = () => {
+  // In development, use localhost:3030 for the save server
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return 'http://localhost:3030';
+  }
+  // In production (Netlify), use the current origin
+  return window.location.origin;
+};
+
 const ModularWebsiteGenerator = ({ selectedContact, onWebsiteGenerated, onClose }) => {
   // Load contact-specific settings from server (fallback to local defaults)
   const loadSavedSettings = useCallback(async () => {
@@ -120,6 +130,7 @@ const ModularWebsiteGenerator = ({ selectedContact, onWebsiteGenerated, onClose 
   const [finalWebsiteUrl, setFinalWebsiteUrl] = useState(null); // Stores the final website URL
   const [activeTab, setActiveTab] = useState('preview'); // 'final' or 'preview' - default to preview for editing
   const [livePreviewUrl, setLivePreviewUrl] = useState(null); // Separate URL for live preview
+  const [previewHtml, setPreviewHtml] = useState(null); // Store preview HTML directly for Netlify deployment
   const [initialPreviewAttempted, setInitialPreviewAttempted] = useState(false); // Track if we've attempted initial preview
   
   // Manual Hero Text Color Controls
@@ -244,7 +255,7 @@ const ModularWebsiteGenerator = ({ selectedContact, onWebsiteGenerated, onClose 
         setGeneratedWebsite(result.website);
         // Set both final website URL and current preview to the existing website
         const timestamp = Date.now();
-        const websiteUrl = `http://localhost:3030${result.website.websiteUrl}?final=true&t=${timestamp}`;
+        const websiteUrl = `${getBaseUrl()}${result.website.websiteUrl}?final=true&t=${timestamp}`;
         setFinalWebsiteUrl(websiteUrl);
         setPreviewUrl(websiteUrl);
         
@@ -253,7 +264,7 @@ const ModularWebsiteGenerator = ({ selectedContact, onWebsiteGenerated, onClose 
         if (result.website.theme) setSelectedTheme(result.website.theme);
         
         // Automatically generate live preview for editing
-        const livePreviewUrl = `http://localhost:3030${result.website.websiteUrl}?preview=true&v=${timestamp}&t=${timestamp}`;
+        const livePreviewUrl = `${getBaseUrl()}${result.website.websiteUrl}?preview=true&v=${timestamp}&t=${timestamp}`;
         setLivePreviewUrl(livePreviewUrl);
         setActiveTab('preview'); // Switch to preview tab for editing
       } else {
@@ -557,6 +568,7 @@ const ModularWebsiteGenerator = ({ selectedContact, onWebsiteGenerated, onClose 
 
   const generatePreview = useCallback(async () => {
     setIsLoadingPreview(true);
+    setPreviewHtml(null); // Clear previous preview HTML
     try {
       // Use sample contact data if no contact is selected
       const contactData = selectedContact || {
@@ -637,9 +649,16 @@ const ModularWebsiteGenerator = ({ selectedContact, onWebsiteGenerated, onClose 
           websiteUrl: result.websiteUrl,
           fileName: result.fileName || `preview-${Date.now()}.html`
         });
-        // Update live preview URL
+        
+        // Store the preview HTML for direct display
+        if (result.previewHtml) {
+          setPreviewHtml(result.previewHtml);
+          console.log('🎨 Preview HTML stored for direct display');
+        }
+        
+        // Update live preview URL (for compatibility but may not be used in Netlify)
         const timestamp = Date.now();
-        setLivePreviewUrl(`http://localhost:3030${result.websiteUrl}?preview=true&v=${timestamp}&t=${timestamp}`);
+        setLivePreviewUrl(`${getBaseUrl()}${result.websiteUrl}?preview=true&v=${timestamp}&t=${timestamp}`);
         // Switch to preview tab automatically when preview is generated
         setActiveTab('preview');
       } else {
@@ -859,7 +878,7 @@ const ModularWebsiteGenerator = ({ selectedContact, onWebsiteGenerated, onClose 
         // Update the final website data
         setGeneratedWebsite(result);
         const timestamp = Date.now();
-        const finalUrl = `http://localhost:3030${result.websiteUrl}?final=true&saved=true&t=${timestamp}`;
+        const finalUrl = `${getBaseUrl()}${result.websiteUrl}?final=true&saved=true&t=${timestamp}`;
         setFinalWebsiteUrl(finalUrl);
         setPreviewUrl(finalUrl);
         
@@ -886,14 +905,14 @@ const ModularWebsiteGenerator = ({ selectedContact, onWebsiteGenerated, onClose 
 
   const openGeneratedWebsite = () => {
     if (generatedWebsite && generatedWebsite.websiteUrl) {
-      const fullUrl = `http://localhost:3030${generatedWebsite.websiteUrl}`;
+      const fullUrl = `${getBaseUrl()}${generatedWebsite.websiteUrl}`;
       window.open(fullUrl, '_blank');
     }
   };
 
   const copyWebsiteUrl = () => {
     if (generatedWebsite && generatedWebsite.websiteUrl) {
-      const fullUrl = `http://localhost:3030${generatedWebsite.websiteUrl}`;
+      const fullUrl = `${getBaseUrl()}${generatedWebsite.websiteUrl}`;
       navigator.clipboard.writeText(fullUrl);
       // Could add toast notification here
     }
@@ -1068,7 +1087,7 @@ const ModularWebsiteGenerator = ({ selectedContact, onWebsiteGenerated, onClose 
         if (result.success) {
           websiteToDeploy = result;
           setGeneratedWebsite(result);
-          setFinalWebsiteUrl(`http://localhost:3030${result.websiteUrl}?t=${Date.now()}`);
+          setFinalWebsiteUrl(`${getBaseUrl()}${result.websiteUrl}?t=${Date.now()}`);
           setPreviewVersion(null); // Clear preview since it's now saved
         } else {
           setError(result.error || 'Failed to save website before deployment');
@@ -2059,14 +2078,24 @@ const ModularWebsiteGenerator = ({ selectedContact, onWebsiteGenerated, onClose 
                 ) : null}
                 
                 {/* Live Preview Tab */}
-                {activeTab === 'preview' && livePreviewUrl && !isLoadingPreview ? (
-                  <iframe
-                    key={`preview-${livePreviewUrl}`}
-                    src={livePreviewUrl}
-                    className="preview-iframe"
-                    title="Live Preview"
-                    sandbox="allow-scripts allow-same-origin"
-                  />
+                {activeTab === 'preview' && !isLoadingPreview ? (
+                  previewHtml ? (
+                    <iframe
+                      key={`preview-html-${Date.now()}`}
+                      srcDoc={previewHtml}
+                      className="preview-iframe"
+                      title="Live Preview"
+                      sandbox="allow-scripts allow-same-origin"
+                    />
+                  ) : livePreviewUrl ? (
+                    <iframe
+                      key={`preview-${livePreviewUrl}`}
+                      src={livePreviewUrl}
+                      className="preview-iframe"
+                      title="Live Preview"
+                      sandbox="allow-scripts allow-same-origin"
+                    />
+                  ) : null
                 ) : null}
                 
                 {/* Fallback to old preview URL for backward compatibility */}
