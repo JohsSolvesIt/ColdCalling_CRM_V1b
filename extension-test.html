@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chrome Extension Diagnostics</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test { margin: 20px 0; padding: 15px; border: 1px solid #ddd; background: #f9f9f9; }
+        .result { margin: 10px 0; padding: 10px; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 10px; border: 1px solid #e9ecef; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Chrome Extension Diagnostic Tool</h1>
+    <p><strong>Instructions:</strong> Run these tests to diagnose the Chrome extension issues.</p>
+
+    <div class="test">
+        <h3>TEST 1: Extension Loading Check</h3>
+        <button onclick="testExtensionLoading()">Check Extension Loading</button>
+        <div id="loading-result" class="result"></div>
+    </div>
+
+    <div class="test">
+        <h3>TEST 2: Class Definition & Instance Check</h3>
+        <button onclick="testClassDefinition()">Check Class & Instance</button>
+        <div id="class-result" class="result"></div>
+    </div>
+
+    <div class="test">
+        <h3>TEST 3: Backend Connectivity</h3>
+        <button onclick="testBackendConnectivity()">Test Backend Connection</button>
+        <div id="backend-result" class="result"></div>
+    </div>
+
+    <div class="test">
+        <h3>TEST 4: Manual Extraction Test</h3>
+        <button onclick="testManualExtraction()">Test Manual Extraction</button>
+        <div id="extraction-result" class="result"></div>
+    </div>
+
+    <div class="test">
+        <h3>TEST 5: Console Log Monitor</h3>
+        <button onclick="startLogMonitoring()">Start Monitoring Console</button>
+        <div id="log-result" class="result"></div>
+        <pre id="console-logs"></pre>
+    </div>
+
+    <script>
+        function showResult(elementId, success, message) {
+            const element = document.getElementById(elementId);
+            element.className = `result ${success ? 'success' : 'error'}`;
+            element.innerHTML = `<strong>${success ? '✅ SUCCESS' : '❌ FAILED'}:</strong> ${message}`;
+        }
+
+        function testExtensionLoading() {
+            const hasClass = typeof window.RealtorDataExtractor !== 'undefined';
+            const hasInstance = typeof window.extractor !== 'undefined';
+            
+            let message = `
+                RealtorDataExtractor class: ${hasClass ? 'DEFINED' : 'UNDEFINED'}<br>
+                window.extractor instance: ${hasInstance ? 'EXISTS' : 'MISSING'}<br>
+                Current URL: ${window.location.href}
+            `;
+            
+            showResult('loading-result', hasClass, message);
+        }
+
+        function testClassDefinition() {
+            try {
+                const classExists = typeof window.RealtorDataExtractor !== 'undefined';
+                const instanceExists = typeof window.extractor !== 'undefined';
+                
+                let details = '';
+                if (classExists) {
+                    details += `Class methods: ${Object.getOwnPropertyNames(window.RealtorDataExtractor.prototype).length}<br>`;
+                }
+                if (instanceExists) {
+                    details += `Instance ready: ${window.extractor.constructor.name}<br>`;
+                    details += `Auto-extraction started: ${window.extractor.autoExtractionStarted || 'false'}<br>`;
+                }
+                
+                showResult('class-result', classExists && instanceExists, details || 'Extension not properly initialized');
+            } catch (error) {
+                showResult('class-result', false, `Error: ${error.message}`);
+            }
+        }
+
+        async function testBackendConnectivity() {
+            try {
+                // Test health endpoint
+                const healthResponse = await fetch('http://localhost:5001/health');
+                const healthData = await healthResponse.json();
+                
+                // Test check-duplicate endpoint
+                const duplicateResponse = await fetch('http://localhost:5001/api/check-duplicate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ agent_id: 'test-' + Date.now() })
+                });
+                const duplicateData = await duplicateResponse.json();
+                
+                const message = `
+                    Health endpoint: ${healthResponse.status} ${healthData.status}<br>
+                    Duplicate check: ${duplicateResponse.status} ${duplicateData.success ? 'SUCCESS' : 'FAILED'}<br>
+                    Backend timestamp: ${healthData.timestamp}
+                `;
+                
+                showResult('backend-result', true, message);
+            } catch (error) {
+                showResult('backend-result', false, `Network error: ${error.message}`);
+            }
+        }
+
+        async function testManualExtraction() {
+            try {
+                if (typeof window.extractor === 'undefined') {
+                    showResult('extraction-result', false, 'No extractor instance found');
+                    return;
+                }
+                
+                // Try manual extraction
+                const data = await window.extractor.extractAllData();
+                const message = `
+                    Extraction completed!<br>
+                    Agent data: ${data.agentData ? 'FOUND' : 'MISSING'}<br>
+                    Properties: ${data.properties ? data.properties.length : 0}<br>
+                    URL: ${data.url || 'Not set'}
+                `;
+                
+                showResult('extraction-result', true, message);
+            } catch (error) {
+                showResult('extraction-result', false, `Extraction error: ${error.message}`);
+            }
+        }
+
+        function startLogMonitoring() {
+            const originalLog = console.log;
+            const originalError = console.error;
+            const logContainer = document.getElementById('console-logs');
+            
+            function captureLog(level, args) {
+                const timestamp = new Date().toISOString().substr(11, 8);
+                const message = Array.from(args).join(' ');
+                logContainer.textContent += `[${timestamp}] ${level.toUpperCase()}: ${message}\n`;
+                logContainer.scrollTop = logContainer.scrollHeight;
+            }
+            
+            console.log = function(...args) {
+                captureLog('log', args);
+                originalLog.apply(console, args);
+            };
+            
+            console.error = function(...args) {
+                captureLog('error', args);
+                originalError.apply(console, args);
+            };
+            
+            showResult('log-result', true, 'Console monitoring started. Check the log output below.');
+            
+            // Test log capture
+            console.log('🔍 Console monitoring test - this should appear in the log area');
+        }
+
+        // Auto-run basic checks on page load
+        window.addEventListener('load', function() {
+            console.log('🔍 Extension diagnostic page loaded');
+            setTimeout(() => {
+                testExtensionLoading();
+                testBackendConnectivity();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

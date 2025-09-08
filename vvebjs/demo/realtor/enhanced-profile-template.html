@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{REALTOR_NAME}} - {{REALTOR_COMPANY}} | Real Estate Professional</title>
+    <meta name="description" content="{{REALTOR_NAME}} is an experienced real estate professional at {{REALTOR_COMPANY}} with {{REALTOR_EXPERIENCE}} of experience. Contact {{REALTOR_NAME}} at {{REALTOR_PHONE}} for all your real estate needs.">
+    <meta name="keywords" content="{{REALTOR_NAME}}, real estate agent, {{REALTOR_COMPANY}}, property sales, home buying, home selling, {{REALTOR_SPECIALTIES}}">
+    
+    <link href="../../css/bootstrap.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #f8f9fa;
+            --text-color: #333;
+            --border-radius: 8px;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--accent-color);
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.1;
+        }
+
+        .profile-container {
+            position: relative;
+            z-index: 2;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .profile-image {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 6px solid rgba(255,255,255,0.3);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            object-fit: cover;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .profile-subtitle {
+            font-size: 1.4rem;
+            font-weight: 300;
+            opacity: 0.9;
+            margin-bottom: 1rem;
+        }
+
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255,255,255,0.1);
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .contact-item:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .contact-item a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .main-content {
+            background: white;
+            margin: -2rem 1rem 0;
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section {
+            padding: 2rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .bio-section {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #555;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .specialties-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .specialty-tag {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .credentials-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .credential-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            border-left: 3px solid var(--success-color);
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .social-link.facebook { background: #3b5998; }
+        .social-link.linkedin { background: #0077b5; }
+        .social-link.twitter { background: #1da1f2; }
+        .social-link.instagram { background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); }
+
+        .social-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+
+        .performance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .performance-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .performance-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .data-source-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--warning-color);
+            color: #333;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .rating-section {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .rating-stars {
+            font-size: 2rem;
+            color: #ffc107;
+            margin-bottom: 0.5rem;
+        }
+
+        .rating-text {
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .cta-button {
+            background: white;
+            color: var(--primary-color);
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .profile-title { font-size: 2rem; }
+            .contact-info { gap: 1rem; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .section { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="data-source-badge">{{DATA_SOURCE}}</div>
+    
+    <div class="hero-section">
+        <div class="container">
+            <div class="profile-container">
+                <img src="{{REALTOR_PHOTO}}" alt="{{REALTOR_NAME}}" class="profile-image">
+                <h1 class="profile-title">{{REALTOR_NAME}}</h1>
+                <p class="profile-subtitle">{{REALTOR_TITLE}} at {{REALTOR_COMPANY}}</p>
+                
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <a href="tel:{{REALTOR_PHONE}}">{{REALTOR_PHONE}}</a>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <a href="mailto:{{REALTOR_EMAIL}}">{{REALTOR_EMAIL}}</a>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-globe"></i>
+                        <a href="{{REALTOR_WEBSITE}}" target="_blank">Website</a>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>{{REALTOR_ADDRESS}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="main-content">
+            <!-- About Section -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-user"></i>
+                    About {{REALTOR_NAME}}
+                </h2>
+                <div class="bio-section">
+                    {{REALTOR_BIO}}
+                </div>
+                
+                <!-- Rating Section -->
+                <div class="rating-section">
+                    <div class="rating-stars">
+                        ⭐⭐⭐⭐⭐
+                    </div>
+                    <div class="rating-text">
+                        {{REALTOR_RATING}}/5 Rating • {{REALTOR_REVIEWS}} Reviews
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Information -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-info-circle"></i>
+                    Professional Information
+                </h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">{{REALTOR_EXPERIENCE}}</div>
+                        <div class="stat-label">Years Experience</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{REALTOR_LICENSE}}</div>
+                        <div class="stat-label">License</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{REALTOR_LANGUAGES}}</div>
+                        <div class="stat-label">Languages</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{REALTOR_REVIEWS}}</div>
+                        <div class="stat-label">Client Reviews</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Specialties -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-star"></i>
+                    Specializations
+                </h2>
+                <div class="specialties-list">
+                    <!-- Dynamic specialties will be inserted here -->
+                    <div class="specialty-tag">{{REALTOR_SPECIALTIES}}</div>
+                </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-chart-line"></i>
+                    Performance Metrics
+                </h2>
+                <div class="performance-grid">
+                    <div class="performance-card">
+                        <i class="fas fa-dollar-sign" style="font-size: 2rem; color: var(--success-color); margin-bottom: 1rem;"></i>
+                        <h4>Sales Volume</h4>
+                        <p>{{PERFORMANCE_SALES}}</p>
+                    </div>
+                    <div class="performance-card">
+                        <i class="fas fa-home" style="font-size: 2rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+                        <h4>Average Sale Price</h4>
+                        <p>{{PERFORMANCE_PRICE}}</p>
+                    </div>
+                    <div class="performance-card">
+                        <i class="fas fa-clock" style="font-size: 2rem; color: var(--warning-color); margin-bottom: 1rem;"></i>
+                        <h4>Avg. Days on Market</h4>
+                        <p>Contact for details</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Credentials -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-certificate"></i>
+                    Credentials & Certifications
+                </h2>
+                <div class="credentials-list">
+                    <div class="credential-item">
+                        <h5>Professional Credentials</h5>
+                        <p>{{CREDENTIALS}}</p>
+                    </div>
+                    <div class="credential-item">
+                        <h5>Licensed in</h5>
+                        <p>{{REALTOR_LICENSE}}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Media -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-share-alt"></i>
+                    Connect on Social Media
+                </h2>
+                <div class="social-links">
+                    <a href="{{SOCIAL_FACEBOOK}}" class="social-link facebook" target="_blank">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="{{SOCIAL_LINKEDIN}}" class="social-link linkedin" target="_blank">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="{{SOCIAL_TWITTER}}" class="social-link twitter" target="_blank">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="{{SOCIAL_INSTAGRAM}}" class="social-link instagram" target="_blank">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="cta-section">
+        <div class="container">
+            <h2>Ready to Work with {{REALTOR_NAME}}?</h2>
+            <p>Contact me today to discuss your real estate needs and goals.</p>
+            <a href="tel:{{REALTOR_PHONE}}" class="cta-button">
+                <i class="fas fa-phone"></i> Call Now
+            </a>
+            <a href="mailto:{{REALTOR_EMAIL}}" class="cta-button">
+                <i class="fas fa-envelope"></i> Send Email
+            </a>
+            <a href="{{REALTOR_WEBSITE}}" class="cta-button" target="_blank">
+                <i class="fas fa-globe"></i> Visit Website
+            </a>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white text-center py-3">
+        <div class="container">
+            <p>&copy; 2025 {{REALTOR_NAME}} - Professional Real Estate Services</p>
+            <p><small>Generated with Enhanced VvebJS • Last Updated: {{LAST_UPDATED}}</small></p>
+        </div>
+    </footer>
+
+    <script src="../../js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Enhanced functionality for the realtor page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add smooth scrolling for internal links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            // Add click tracking for contact elements
+            document.querySelectorAll('.contact-item a, .cta-button').forEach(element => {
+                element.addEventListener('click', function() {
+                    console.log('Contact interaction:', this.href || this.textContent);
+                });
+            });
+
+            // Add dynamic rating display
+            const rating = '{{REALTOR_RATING}}';
+            if (rating && rating !== 'N/A') {
+                const ratingValue = parseFloat(rating);
+                const starsContainer = document.querySelector('.rating-stars');
+                if (starsContainer && ratingValue > 0) {
+                    const fullStars = Math.floor(ratingValue);
+                    const hasHalfStar = ratingValue % 1 >= 0.5;
+                    let starsHtml = '';
+                    
+                    for (let i = 0; i < fullStars; i++) {
+                        starsHtml += '⭐';
+                    }
+                    if (hasHalfStar) {
+                        starsHtml += '✨';
+                    }
+                    for (let i = fullStars + (hasHalfStar ? 1 : 0); i < 5; i++) {
+                        starsHtml += '☆';
+                    }
+                    
+                    starsContainer.innerHTML = starsHtml;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Extension Test",
+  "version": "1.0",
+  "description": "Simple test to verify extension loading",
+  "permissions": [
+    "activeTab"
+  ],
+  "host_permissions": [
+    "*://*.realtor.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["*://*.realtor.com/*"],
+      "js": ["test-extension.js"],
+      "run_at": "document_end"
+    }
+  ]
+}

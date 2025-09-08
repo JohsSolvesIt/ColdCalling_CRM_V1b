@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Minimal Test Extension",
+  "version": "1.0",
+  "description": "Test basic injection",
+  "permissions": [
+    "activeTab"
+  ],
+  "host_permissions": [
+    "*://*.realtor.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["*://*.realtor.com/*"],
+      "js": ["minimal-test.js"],
+      "run_at": "document_end"
+    }
+  ]
+}

@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{AGENT_NAME}} - Luxury Real Estate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com        .property-price {
+            font-size: 16px;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .property-details {
+            font-size: 14px;
+            color: #2d3748;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }nter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #ffffff;
+            color: #000000;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation - Fixed Header */
+        .navigation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .agent-name {
+            font-size: 24px;
+            font-weight: 600;
+            color: #000000;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        /* Hero Section - Full Screen */
+        .hero {
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8fafc;
+            background-image: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: {{HERO_BACKGROUND_IMAGE}};
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: {{HERO_BLUR}};
+            z-index: 0;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: {{HERO_OVERLAY}};
+            z-index: 1;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            z-index: 3;
+            position: relative;
+        }
+
+        .hero-title {
+            font-size: 96px;
+            font-weight: 300;
+            letter-spacing: 6px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            color: {{HERO_TEXT_COLOR}};
+            line-height: 1.1;
+        }
+
+        .hero-role {
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: 3px;
+            margin-bottom: 50px;
+            text-transform: uppercase;
+            color: {{HERO_TEXT_COLOR}};
+        }
+
+        .hero-subtitle {
+            font-size: 18px;
+            font-weight: 400;
+            letter-spacing: 4px;
+            margin-bottom: 60px;
+            text-transform: uppercase;
+            color: {{HERO_TEXT_SECONDARY}};
+        }
+
+        /* Desktop spacing (larger screens) */
+        @media (min-width: 1025px) {
+            .hero-title {
+                margin-bottom: 40px;
+            }
+            
+            .hero-role {
+                margin-bottom: 70px;
+            }
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin-bottom: 80px;
+        }
+
+        .hero-btn {
+            padding: 20px 40px;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            border: 2px solid {{HERO_TEXT_COLOR}};
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .hero-btn.primary {
+            background: {{HERO_TEXT_COLOR}};
+            color: {{HERO_ACCENT_COLOR}};
+        }
+
+        .hero-btn.primary:hover {
+            background: transparent;
+            color: {{HERO_TEXT_COLOR}};
+        }
+
+        .hero-btn.secondary {
+            background: transparent;
+            color: {{HERO_TEXT_COLOR}};
+        }
+
+        .hero-btn.secondary:hover {
+            background: {{HERO_TEXT_COLOR}};
+            color: {{HERO_ACCENT_COLOR}};
+        }
+
+        /* Agent Introduction */
+        .introduction {
+            padding: 120px 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 72px;
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+            color: #000000;
+        }
+
+        .introduction-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+            margin-top: 80px;
+        }
+
+        @media (max-width: 1200px) {
+            .introduction-content {
+                grid-template-columns: 1fr 1fr;
+                gap: 60px;
+            }
+        }
+
+        .intro-text {
+            text-align: left;
+        }
+
+        .intro-description {
+            font-size: 20px;
+            line-height: 1.8;
+            color: #1a1a1a;
+            margin-bottom: 40px;
+        }
+
+        .intro-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 30px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 600;
+            color: #000000;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            font-weight: 400;
+            color: #2d3748;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .agent-image {
+            width: 100%;
+            height: 600px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        @media (max-width: 1200px) {
+            .agent-image {
+                height: 450px;
+            }
+        }
+
+        .agent-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .agent-image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2d3748;
+            font-size: 16px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+        }
+
+        /* Portfolio Section */
+        .portfolio {
+            background: #f8fafc;
+            padding: 120px 40px;
+        }
+
+        .portfolio-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .portfolio-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .portfolio-subtitle {
+            font-size: 18px;
+            color: #2d3748;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .property-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+        }
+
+        .property-card {
+            background: #ffffff;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .property-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .property-image {
+            height: 300px;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2d3748;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .property-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .property-status {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #000000;
+            color: #ffffff;
+            padding: 8px 16px;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .property-info {
+            padding: 40px;
+        }
+
+        .property-price {
+            font-size: 32px;
+            font-weight: 600;
+            color: #000000;
+            margin-bottom: 15px;
+        }
+
+        .property-address {
+            font-size: 24px;
+            font-weight: 500;
+            color: #000000;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .property-location {
+            font-size: 16px;
+            color: #666666;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .property-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            padding: 15px 0;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+
+        .detail-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .detail-number {
+            display: block;
+            font-size: 24px;
+            font-weight: 600;
+            color: #000000;
+            margin-bottom: 5px;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: #666666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        .property-type {
+            font-size: 14px;
+            color: #666666;
+            margin: 10px 0 5px 0;
+            text-transform: none;
+            letter-spacing: 0.5px;
+        }
+
+        .property-status-text {
+            font-size: 14px;
+            color: #666666;
+            text-transform: none;
+            letter-spacing: 0.5px;
+        }
+
+        /* Testimonials Section */
+        .testimonials {
+            padding: 80px 40px;
+        }
+
+        .testimonials-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            text-align: center;
+            min-height: auto;
+        }
+
+        .testimonial-content {
+            max-width: 900px;
+            margin: 40px auto 0;
+        }
+
+        .testimonial-quote {
+            font-size: 32px;
+            line-height: 1.5;
+            color: #1a1a1a;
+            font-style: italic;
+            margin-bottom: 40px;
+            font-weight: 300;
+        }
+
+        .testimonial-author {
+            font-size: 16px;
+            font-weight: 600;
+            color: #000000;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Contact Section */
+        .contact {
+            background: #000000;
+            color: #ffffff;
+            padding: 120px 40px;
+        }
+
+        .contact-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .contact-title {
+            font-size: 72px;
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+            color: #ffffff;
+        }
+
+        .contact-subtitle {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 80px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .contact-item {
+            text-align: center;
+        }
+
+        .contact-label {
+            font-size: 12px;
+            font-weight: 400;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-bottom: 15px;
+        }
+
+        .contact-value {
+            font-size: 18px;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .contact-value a {
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        /* Footer */
+        .footer {
+            background: #000000;
+            color: #ffffff;
+            padding: 40px;
+            text-align: center;
+            border-top: 1px solid #333333;
+        }
+
+        .footer-text {
+            font-size: 16px;
+            opacity: 0.7;
+            letter-spacing: 1px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 48px;
+                letter-spacing: 3px;
+            }
+
+            .section-title {
+                font-size: 36px;
+                letter-spacing: 2px;
+            }
+
+            .contact-title {
+                font-size: 36px;
+                letter-spacing: 2px;
+            }
+
+            .introduction-content {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .agent-image {
+                height: 350px;
+                margin-top: 20px;
+            }
+
+            .property-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-info {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .nav-container {
+                padding: 0 20px;
+            }
+        }
+
+        /* Tablet styles (768px - 1024px) */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .hero-title {
+                font-size: 84px;
+                margin-bottom: 35px;
+            }
+            
+            .hero-role {
+                margin-bottom: 60px;
+            }
+            
+            .intro-container {
+                grid-template-columns: 1fr;
+                gap: 60px;
+                text-align: center;
+            }
+            
+            .intro-stats {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 20px;
+            }
+            
+            .agent-image {
+                height: 400px;
+            }
+            
+            .portfolio-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 30px;
+            }
+            
+            .contact-info {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 30px;
+            }
+            
+            .hero-container,
+            .intro-container,
+            .portfolio-container,
+            .testimonial-container,
+            .contact-container {
+                padding: 0 30px;
+            }
+        }
+
+        /* Mobile styles (up to 768px) */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 48px;
+                line-height: 1.1;
+                margin-bottom: 20px;
+            }
+            
+            .hero-subtitle {
+                font-size: 18px;
+                margin-bottom: 30px;
+            }
+            
+            .hero-description {
+                font-size: 16px;
+                margin-bottom: 40px;
+            }
+            
+            .section-title {
+                font-size: 36px;
+                line-height: 1.2;
+                margin-bottom: 30px;
+            }
+            
+            .intro-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                margin-top: 60px;
+                text-align: center;
+            }
+            
+            .intro-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+            
+            .stat-item {
+                padding: 20px;
+            }
+            
+            .stat-value {
+                font-size: 28px;
+            }
+            
+            .portfolio-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .testimonial-quote {
+                font-size: 24px;
+                line-height: 1.4;
+                margin-bottom: 30px;
+            }
+            
+            .contact-info {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .contact-item {
+                padding: 25px 20px;
+            }
+            
+            .contact-title {
+                font-size: 32px;
+                margin-bottom: 20px;
+            }
+            
+            .hero-container,
+            .intro-container,
+            .portfolio-container,
+            .testimonial-container,
+            .contact-container {
+                padding: 0 20px;
+            }
+            
+            .intro,
+            .portfolio,
+            .testimonial,
+            .contact {
+                padding: 80px 0;
+            }
+            
+            .navigation {
+                padding: 15px 0;
+            }
+            
+            .agent-name {
+                font-size: 20px;
+            }
+        }
+
+        /* Small mobile styles (up to 480px) */
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 36px;
+            }
+            
+            .section-title {
+                font-size: 28px;
+            }
+            
+            .intro-stats {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .agent-image {
+                height: 250px;
+            }
+            
+            .stat-item {
+                padding: 15px;
+            }
+            
+            .testimonial-quote {
+                font-size: 22px;
+            }
+            
+            .contact-item {
+                padding: 20px 15px;
+            }
+            
+            .hero-container,
+            .intro-container,
+            .portfolio-container,
+            .testimonial-container,
+            .contact-container {
+                padding: 0 15px;
+            }
+            
+            .intro,
+            .portfolio,
+            .testimonial,
+            .contact {
+                padding: 60px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navigation">
+        <div class="nav-container">
+            <div class="agent-name">{{AGENT_NAME}}</div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">{{AGENT_NAME}}</h1>
+            <p class="hero-role">REAL ESTATE PROFESSIONAL</p>
+            <div class="hero-buttons">
+                <a href="#portfolio" class="hero-btn primary">SEARCH PROPERTIES</a>
+                <a href="#contact" class="hero-btn secondary">HOME VALUATION</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Introduction Section -->
+    <section class="introduction">
+        <h2 class="section-title">MEET<br>{{AGENT_NAME}}</h2>
+        
+        <div class="introduction-content">
+            <div class="intro-text">
+                <p class="intro-description">
+                    {{AGENT_BIO}}
+                </p>
+                
+                <div class="intro-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">{{TOTAL_PROPERTIES}}</div>
+                        <div class="stat-label">PROPERTIES LISTED</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${{AVERAGE_PRICE}}</div>
+                        <div class="stat-label">AVERAGE PRICE</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{PRICE_RANGE}}</div>
+                        <div class="stat-label">PRICE RANGE</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{YEARS_EXPERIENCE}}</div>
+                        <div class="stat-label">YEARS EXPERIENCE</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="agent-image">
+                <img src="{{AGENT_PHOTO}}" alt="{{AGENT_NAME}} - Professional Headshot" loading="lazy" 
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                     onload="this.nextElementSibling.style.display='none';">
+                <div class="agent-image-placeholder" style="display: flex;">
+                    PROFESSIONAL HEADSHOT<br>
+                    <small style="font-size: 12px; margin-top: 10px;">{{AGENT_NAME}}</small>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section class="portfolio" id="portfolio">
+        <div class="portfolio-container">
+            <div class="portfolio-header">
+                <p class="portfolio-subtitle">PORTFOLIO</p>
+                <h2 class="section-title">RECENT SALES</h2>
+            </div>
+            
+            <div class="portfolio-grid">
+                <!-- Property cards will be dynamically generated from real data -->
+                {{PORTFOLIO_GRID}}
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <div class="testimonials-container">
+            <h2 class="section-title">HAPPY CLIENTS</h2>
+            
+            {{TESTIMONIALS_CONTENT}}
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <div class="contact-container">
+            <h2 class="contact-title">WORK WITH<br>{{AGENT_NAME}}</h2>
+            <p class="contact-subtitle">Representing sellers, buyers, investors and developers</p>
+            
+            <div class="contact-info">
+                <div class="contact-item">
+                    <div class="contact-label">PHONE NUMBER</div>
+                    <div class="contact-value">
+                        <a href="tel:{{AGENT_PHONE}}">{{AGENT_PHONE}}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-text">
+            © 2025 - Silicode LLC - all rights reserved - Text JOSH @ 207-355-5760 for your own website!
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Manual Hero Text Color Support - Safe implementation
+        (function() {
+            const manualColorsEnabled = {{MANUAL_HERO_TEXT_COLORS}};
+            
+            if (manualColorsEnabled) {
+                console.log('🎨 Applying manual hero text colors...');
+                
+                // Create style element for manual color overrides
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    .hero-title,
+                    .hero-title.white-overlay {
+                        color: {{HERO_TEXT_COLOR}} !important;
+                    }
+                    .hero-role,
+                    .hero-role.white-overlay,
+                    .hero-subtitle,
+                    .hero-subtitle.white-overlay {
+                        color: {{HERO_TEXT_SECONDARY}} !important;
+                    }
+                    .cta-primary {
+                        background-color: {{HERO_ACCENT_COLOR}} !important;
+                        border-color: {{HERO_ACCENT_COLOR}} !important;
+                    }
+                    .cta-primary:hover {
+                        background-color: {{HERO_ACCENT_COLOR}}cc !important;
+                        border-color: {{HERO_ACCENT_COLOR}}cc !important;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            // Auto-detect white overlay and apply appropriate styling
+            function detectOverlayType() {
+                // Skip automatic overlay detection if manual colors are enabled
+                if (manualColorsEnabled) {
+                    console.log('🎨 Manual hero colors enabled - skipping automatic overlay detection');
+                    return;
+                }
+                
+                const heroTitle = document.querySelector('.hero-title');
+                const heroRole = document.querySelector('.hero-role');
+            
+            if (!heroTitle || !heroRole) {
+                console.log('❌ Hero title or role elements not found');
+                return;
+            }
+            
+            // First, ensure default white text by removing white-overlay class
+            heroTitle.classList.remove('white-overlay');
+            heroRole.classList.remove('white-overlay');
+            
+            // Now check if white overlay should be applied
+            const hero = document.querySelector('.hero');
+            if (hero) {
+                // Check multiple ways to detect white overlay
+                const heroStyle = window.getComputedStyle(hero, '::before');
+                let backgroundColor = heroStyle.backgroundColor;
+                
+                console.log('🔍 Checking overlay color:', backgroundColor);
+                
+                // Also check the hero element itself
+                if (!backgroundColor || backgroundColor === 'rgba(0, 0, 0, 0)' || backgroundColor === 'transparent') {
+                    const heroElementStyle = window.getComputedStyle(hero);
+                    backgroundColor = heroElementStyle.backgroundColor;
+                    console.log('🔍 Fallback hero element color:', backgroundColor);
+                }
+                
+                // Check if overlay has significant white component
+                let isWhiteOverlay = false;
+                if (backgroundColor && backgroundColor.includes('rgb')) {
+                    const rgbMatch = backgroundColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                    if (rgbMatch) {
+                        const r = parseInt(rgbMatch[1]);
+                        const g = parseInt(rgbMatch[2]);
+                        const b = parseInt(rgbMatch[3]);
+                        
+                        console.log('🔍 RGB values:', { r, g, b });
+                        
+                        // If RGB values are closer to white (> 200), it's a white overlay
+                        isWhiteOverlay = r > 200 && g > 200 && b > 200;
+                    }
+                }
+                
+                // Apply appropriate styling based on overlay type
+                if (isWhiteOverlay) {
+                    // White overlay selected - use dark gray text
+                    heroTitle.classList.add('white-overlay');
+                    heroRole.classList.add('white-overlay');
+                    console.log('✅ White overlay detected - applying dark text styling');
+                } else {
+                    // White overlay NOT selected - ensure white text (already removed classes above)
+                    console.log('✅ Dark overlay mode - using white text styling');
+                }
+            }
+            }
+
+            // Run overlay detection when page loads
+            window.addEventListener('load', detectOverlayType);
+            // Also run immediately in case load already fired
+            detectOverlayType();
+        })();
+    </script>
+</body>
+</html>

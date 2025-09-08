@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cassandra Skelley - Luxury Real Estate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #ffffff;
+            color: #000000;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation - Fixed Header */
+        .navigation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .agent-name {
+            font-size: 24px;
+            font-weight: 600;
+            color: #000000;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        /* Hero Section - Full Screen */
+        .hero {
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            z-index: 2;
+            position: relative;
+        }
+
+        .hero-title {
+            font-size: 96px;
+            font-weight: 300;
+            letter-spacing: 6px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            color: #000000;
+            line-height: 1.1;
+        }
+
+        .hero-subtitle {
+            font-size: 18px;
+            font-weight: 400;
+            letter-spacing: 4px;
+            margin-bottom: 60px;
+            text-transform: uppercase;
+            color: #666666;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin-bottom: 80px;
+        }
+
+        .hero-btn {
+            padding: 20px 40px;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            border: 2px solid #000000;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .hero-btn.primary {
+            background: #000000;
+            color: #ffffff;
+        }
+
+        .hero-btn.primary:hover {
+            background: transparent;
+            color: #000000;
+        }
+
+        .hero-btn.secondary {
+            background: transparent;
+            color: #000000;
+        }
+
+        .hero-btn.secondary:hover {
+            background: #000000;
+            color: #ffffff;
+        }
+
+        /* Agent Introduction */
+        .introduction {
+            padding: 120px 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 72px;
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+            color: #000000;
+        }
+
+        .introduction-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+            margin-top: 80px;
+        }
+
+        @media (max-width: 1200px) {
+            .introduction-content {
+                grid-template-columns: 1fr 1fr;
+                gap: 60px;
+            }
+        }
+
+        .intro-text {
+            text-align: left;
+        }
+
+        .intro-description {
+            font-size: 20px;
+            line-height: 1.8;
+            color: #333333;
+            margin-bottom: 40px;
+        }
+
+        .intro-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 30px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 600;
+            color: #000000;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            font-weight: 400;
+            color: #666666;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .agent-image {
+            width: 100%;
+            height: 600px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        @media (max-width: 1200px) {
+            .agent-image {
+                height: 450px;
+            }
+        }
+
+        .agent-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .agent-image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666666;
+            font-size: 16px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+        }
+
+        /* Portfolio Section */
+        .portfolio {
+            background: #f8fafc;
+            padding: 120px 40px;
+        }
+
+        .portfolio-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .portfolio-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .portfolio-subtitle {
+            font-size: 18px;
+            color: #666666;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .property-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+        }
+
+        .property-card {
+            background: #ffffff;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .property-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .property-image {
+            height: 300px;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666666;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .property-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .property-status {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #000000;
+            color: #ffffff;
+            padding: 8px 16px;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .property-info {
+            padding: 40px;
+        }
+
+        .property-price {
+            font-size: 32px;
+            font-weight: 600;
+            color: #000000;
+            margin-bottom: 15px;
+        }
+
+        .property-address {
+            font-size: 24px;
+            font-weight: 500;
+            color: #000000;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .property-location {
+            font-size: 16px;
+            color: #666666;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .property-details {
+            font-size: 14px;
+            color: #666666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Testimonials Section */
+        .testimonials {
+            padding: 120px 40px;
+        }
+
+        .testimonials-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .testimonial-content {
+            max-width: 800px;
+            margin: 80px auto 0;
+        }
+
+        .testimonial-quote {
+            font-size: 24px;
+            line-height: 1.6;
+            color: #333333;
+            font-style: italic;
+            margin-bottom: 40px;
+        }
+
+        .testimonial-author {
+            font-size: 14px;
+            font-weight: 600;
+            color: #000000;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Contact Section */
+        .contact {
+            background: #000000;
+            color: #ffffff;
+            padding: 120px 40px;
+        }
+
+        .contact-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .contact-title {
+            font-size: 72px;
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+            color: #ffffff;
+        }
+
+        .contact-subtitle {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 80px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .contact-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 60px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .contact-item {
+            text-align: center;
+        }
+
+        .contact-label {
+            font-size: 12px;
+            font-weight: 400;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-bottom: 15px;
+        }
+
+        .contact-value {
+            font-size: 18px;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .contact-value a {
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        /* Footer */
+        .footer {
+            background: #000000;
+            color: #ffffff;
+            padding: 40px;
+            text-align: center;
+            border-top: 1px solid #333333;
+        }
+
+        .footer-text {
+            font-size: 12px;
+            opacity: 0.7;
+            letter-spacing: 1px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 48px;
+                letter-spacing: 3px;
+            }
+
+            .section-title {
+                font-size: 36px;
+                letter-spacing: 2px;
+            }
+
+            .contact-title {
+                font-size: 36px;
+                letter-spacing: 2px;
+            }
+
+            .introduction-content {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .agent-image {
+                height: 350px;
+                margin-top: 20px;
+            }
+
+            .property-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-info {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .nav-container {
+                padding: 0 20px;
+            }
+        }
+
+        /* Tablet styles (768px - 1024px) */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .hero-title {
+                font-size: 84px;
+            }
+            
+            .intro-container {
+                grid-template-columns: 1fr;
+                gap: 60px;
+                text-align: center;
+            }
+            
+            .intro-stats {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 20px;
+            }
+            
+            .agent-image {
+                height: 400px;
+            }
+            
+            .portfolio-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 30px;
+            }
+            
+            .contact-info {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 30px;
+            }
+            
+            .hero-container,
+            .intro-container,
+            .portfolio-container,
+            .testimonial-container,
+            .contact-container {
+                padding: 0 30px;
+            }
+        }
+
+        /* Mobile styles (up to 768px) */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 48px;
+                line-height: 1.1;
+                margin-bottom: 20px;
+            }
+            
+            .hero-subtitle {
+                font-size: 18px;
+                margin-bottom: 30px;
+            }
+            
+            .hero-description {
+                font-size: 16px;
+                margin-bottom: 40px;
+            }
+            
+            .section-title {
+                font-size: 36px;
+                line-height: 1.2;
+                margin-bottom: 30px;
+            }
+            
+            .intro-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                margin-top: 60px;
+                text-align: center;
+            }
+            
+            .intro-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+            
+            .stat-item {
+                padding: 20px;
+            }
+            
+            .stat-value {
+                font-size: 28px;
+            }
+            
+            .portfolio-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .testimonial-quote {
+                font-size: 20px;
+                line-height: 1.4;
+                margin-bottom: 30px;
+            }
+            
+            .contact-info {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .contact-item {
+                padding: 25px 20px;
+            }
+            
+            .contact-title {
+                font-size: 32px;
+                margin-bottom: 20px;
+            }
+            
+            .hero-container,
+            .intro-container,
+            .portfolio-container,
+            .testimonial-container,
+            .contact-container {
+                padding: 0 20px;
+            }
+            
+            .intro,
+            .portfolio,
+            .testimonial,
+            .contact {
+                padding: 80px 0;
+            }
+            
+            .navigation {
+                padding: 15px 0;
+            }
+            
+            .agent-name {
+                font-size: 20px;
+            }
+        }
+
+        /* Small mobile styles (up to 480px) */
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 36px;
+            }
+            
+            .section-title {
+                font-size: 28px;
+            }
+            
+            .intro-stats {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .agent-image {
+                height: 250px;
+            }
+            
+            .stat-item {
+                padding: 15px;
+            }
+            
+            .testimonial-quote {
+                font-size: 18px;
+            }
+            
+            .contact-item {
+                padding: 20px 15px;
+            }
+            
+            .hero-container,
+            .intro-container,
+            .portfolio-container,
+            .testimonial-container,
+            .contact-container {
+                padding: 0 15px;
+            }
+            
+            .intro,
+            .portfolio,
+            .testimonial,
+            .contact {
+                padding: 60px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navigation">
+        <div class="nav-container">
+            <div class="agent-name">Cassandra Skelley</div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Cassandra Skelley</h1>
+            <p class="hero-subtitle">SERVING Local Area AND SURROUNDING AREAS</p>
+            <div class="hero-buttons">
+                <a href="#portfolio" class="hero-btn primary">SEARCH PROPERTIES</a>
+                <a href="#contact" class="hero-btn secondary">HOME VALUATION</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Introduction Section -->
+    <section class="introduction">
+        <h2 class="section-title">MEET<br>Cassandra Skelley</h2>
+        
+        <div class="introduction-content">
+            <div class="intro-text">
+                <p class="intro-description">
+                    A licensed Real Estate professional specializing in luxury properties throughout Local Area. 
+                    Known for unwavering professionalism, market expertise, and resolute work ethic.
+                </p>
+                
+                <div class="intro-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">10</div>
+                        <div class="stat-label">PROPERTIES LISTED</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">$498K</div>
+                        <div class="stat-label">AVERAGE PRICE</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">$60K - $1.1M</div>
+                        <div class="stat-label">PRICE RANGE</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">10+</div>
+                        <div class="stat-label">YEARS EXPERIENCE</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="agent-image">
+                <img src="https://p.rdcpix.com/v01/ga0471500-c0rd-w512_r7.webp" alt="Cassandra Skelley - Professional Headshot" loading="lazy" 
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                     onload="this.nextElementSibling.style.display='none';">
+                <div class="agent-image-placeholder" style="display: flex;">
+                    PROFESSIONAL HEADSHOT<br>
+                    <small style="font-size: 12px; margin-top: 10px;">Cassandra Skelley</small>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section class="portfolio" id="portfolio">
+        <div class="portfolio-container">
+            <div class="portfolio-header">
+                <p class="portfolio-subtitle">PORTFOLIO</p>
+                <h2 class="section-title">RECENT SALES</h2>
+            </div>
+            
+            <div class="portfolio-grid">
+                <!-- Property cards will be dynamically generated from real data -->
+                
+      <div class="property-card">
+        <div class="property-image">
+          <img src="https://ap.rdcpix.com/4443dfa789af604106eafbf5d641b601l-m4015132482rd-w1024.webp" alt="252 SE Condor Dr, Gresham, OR 97080" loading="lazy">
+          <div class="property-status">Available</div>
+        </div>
+        <div class="property-info">
+          <div class="property-price">$605,000</div>
+          <div class="property-address">252 SE Condor Dr, Gresham, OR 97080</div>
+          <div class="property-location">Location Available</div>
+          <div class="property-details">
+            <span>N/A bed</span> • 
+            <span>N/A bath</span> • 
+            <span>N/A sqft</span>
+          </div>
+        </div>
+      </div>
+    
+      <div class="property-card">
+        <div class="property-image">
+          <img src="https://ap.rdcpix.com/2320ed04118d9cd26e65ec62bcd080aal-m2313818612rd-w1024.webp" alt="16745 SE Division St Unit 287, Portland, OR 97236" loading="lazy">
+          <div class="property-status">Available</div>
+        </div>
+        <div class="property-info">
+          <div class="property-price">$59,900</div>
+          <div class="property-address">16745 SE Division St Unit 287, Portland, OR 97236</div>
+          <div class="property-location">Location Available</div>
+          <div class="property-details">
+            <span>N/A bed</span> • 
+            <span>N/A bath</span> • 
+            <span>N/A sqft</span>
+          </div>
+        </div>
+      </div>
+    
+      <div class="property-card">
+        <div class="property-image">
+          <img src="https://ap.rdcpix.com/d164a4d7690cafb9d01b45b0ca1b8066l-m1444944619rd-w1024.webp" alt="907 Julie Ln, Molalla, OR 97038" loading="lazy">
+          <div class="property-status">Available</div>
+        </div>
+        <div class="property-info">
+          <div class="property-price">$500,000</div>
+          <div class="property-address">907 Julie Ln, Molalla, OR 97038</div>
+          <div class="property-location">Location Available</div>
+          <div class="property-details">
+            <span>N/A bed</span> • 
+            <span>N/A bath</span> • 
+            <span>N/A sqft</span>
+          </div>
+        </div>
+      </div>
+    
+      <div class="property-card">
+        <div class="property-image">
+          <img src="https://ap.rdcpix.com/6c391c152d0dc367d0f84d4a8ed7af2bl-m481101245rd-w1024.webp" alt="9472 SE Emerald LoopHappy Valley, OR 97086" loading="lazy">
+          <div class="property-status">Available</div>
+        </div>
+        <div class="property-info">
+          <div class="property-price">$1,075,000</div>
+          <div class="property-address">9472 SE Emerald LoopHappy Valley, OR 97086</div>
+          <div class="property-location">Location Available</div>
+          <div class="property-details">
+            <span>N/A bed</span> • 
+            <span>N/A bath</span> • 
+            <span>N/A sqft</span>
+          </div>
+        </div>
+      </div>
+    
+      <div class="property-card">
+        <div class="property-image">
+          <img src="https://ap.rdcpix.com/594257f2fe967a8915a7730d46d32901l-m3034251682rd-w1024.webp" alt="14391 SE 118th Dr, Clackamas, OR 97015" loading="lazy">
+          <div class="property-status">Available</div>
+        </div>
+        <div class="property-info">
+          <div class="property-price">$900,000</div>
+          <div class="property-address">14391 SE 118th Dr, Clackamas, OR 97015</div>
+          <div class="property-location">Location Available</div>
+          <div class="property-details">
+            <span>N/A bed</span> • 
+            <span>N/A bath</span> • 
+            <span>N/A sqft</span>
+          </div>
+        </div>
+      </div>
+    
+      <div class="property-card">
+        <div class="property-image">
+          <img src="https://ap.rdcpix.com/c8587598689516ff10943c2a2ad24be2l-m2628112133rd-w1024.webp" alt="10193 SE Crescent Ridge LoopHappy Valley, OR 97086" loading="lazy">
+          <div class="property-status">Available</div>
+        </div>
+        <div class="property-info">
+          <div class="property-price">$770,000</div>
+          <div class="property-address">10193 SE Crescent Ridge LoopHappy Valley, OR 97086</div>
+          <div class="property-location">Location Available</div>
+          <div class="property-details">
+            <span>N/A bed</span> • 
+            <span>N/A bath</span> • 
+            <span>N/A sqft</span>
+          </div>
+        </div>
+      </div>
+    
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <div class="testimonials-container">
+            <h2 class="section-title">HAPPY CLIENTS</h2>
+            
+            
+      <div class="testimonial-content">
+        <div class="testimonial-quote">
+          "Cassandra Skelley was extremely helpful with our home purchase. As first time buyers, 
+          we felt very comfortable knowing we had their expertise. They were knowledgeable 
+          about the market and helped us navigate every step of the process with professionalism and care."
+        </div>
+        <div class="testimonial-author">SATISFIED CLIENT</div>
+      </div>
+    
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <div class="contact-container">
+            <h2 class="contact-title">WORK WITH<br>Cassandra Skelley</h2>
+            <p class="contact-subtitle">Representing sellers, buyers, investors and developers</p>
+            
+            <div class="contact-info">
+                <div class="contact-item">
+                    <div class="contact-label">EMAIL</div>
+                    <div class="contact-value">
+                        <a href="mailto:Contact for email">Contact for email</a>
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-label">PHONE NUMBER</div>
+                    <div class="contact-value">
+                        <a href="tel:5038161913">5038161913</a>
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-label">OFFICE</div>
+                    <div class="contact-value">Show Team<br>Local Area</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-text">
+            © 2025 Cassandra Skelley. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

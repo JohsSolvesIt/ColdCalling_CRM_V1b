@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realtor Page Editor - VvebJS</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .editor-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #667eea;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+        
+        .controls {
+            background: #f8f9fa;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            background: #5a67d8;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        select {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .editor-frame {
+            border: none;
+            width: 100%;
+            height: 600px;
+        }
+        
+        .status {
+            background: #e9ecef;
+            padding: 1rem 2rem;
+            border-top: 1px solid #ddd;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        
+        .page-list {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+        
+        .page-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+        
+        .page-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .page-item.active {
+            background: #e3f2fd;
+            border-left: 3px solid #667eea;
+        }
+        
+        .page-info {
+            flex: 1;
+        }
+        
+        .page-name {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .page-details {
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <div class="header">
+            <h1>🏠 Realtor Page Editor</h1>
+            <div>
+                <span id="current-page">No page selected</span>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <select id="database-select">
+                <option value="">Select Database...</option>
+            </select>
+            
+            <button class="btn" onclick="loadRealtors()">Load Realtors</button>
+            <button class="btn btn-secondary" onclick="refreshPage()">Refresh</button>
+            <button class="btn btn-success" onclick="savePage()" id="save-btn" disabled>Save Changes</button>
+            <button class="btn" onclick="generateNew()">Generate New</button>
+        </div>
+        
+        <!-- Page List -->
+        <div id="page-list-container" style="padding: 1rem 2rem; display: none;">
+            <h3>Available Realtor Pages</h3>
+            <div id="page-list" class="page-list"></div>
+        </div>
+        
+        <!-- Editor Frame -->
+        <iframe id="editor-frame" class="editor-frame" src="about:blank"></iframe>
+        
+        <div class="status">
+            <span id="status-text">Ready - Select a database and load realtors to begin editing</span>
+        </div>
+    </div>
+
+    <script>
+        let currentRealtor = null;
+        let currentDatabase = null;
+        let realtorPages = [];
+        
+        // Initialize the editor
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDatabases();
+            
+            // Enable save button when content changes
+            const frame = document.getElementById('editor-frame');
+            frame.addEventListener('load', function() {
+                try {
+                    const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                    
+                    // Add edit indicators to VvebJS editable elements
+                    frameDoc.querySelectorAll('.vvebjs-editable').forEach(element => {
+                        element.addEventListener('click', function() {
+                            makeEditable(element);
+                        });
+                        
+                        // Add visual edit indicator
+                        element.style.border = '1px dashed transparent';
+                        element.addEventListener('mouseenter', function() {
+                            this.style.border = '1px dashed #667eea';
+                            this.style.cursor = 'pointer';
+                        });
+                        element.addEventListener('mouseleave', function() {
+                            this.style.border = '1px dashed transparent';
+                        });
+                    });
+                    
+                    document.getElementById('save-btn').disabled = false;
+                } catch (e) {
+                    console.log('Frame not accessible:', e);
+                }
+            });
+        });
+        
+        // Load available databases
+        async function loadDatabases() {
+            try {
+                updateStatus('Loading databases...');
+                const response = await fetch('/api/databases');
+                const databases = await response.json();
+                
+                const select = document.getElementById('database-select');
+                select.innerHTML = '<option value="">Select Database...</option>';
+                
+                databases.forEach(db => {
+                    const option = document.createElement('option');
+                    option.value = db.name;
+                    option.textContent = `${db.name} (${db.realtorCount || 0} realtors)`;
+                    select.appendChild(option);
+                });
+                
+                updateStatus(`Found ${databases.length} databases`);
+            } catch (error) {
+                updateStatus('Error loading databases: ' + error.message);
+            }
+        }
+        
+        // Load realtors from selected database
+        async function loadRealtors() {
+            const dbName = document.getElementById('database-select').value;
+            if (!dbName) {
+                alert('Please select a database first');
+                return;
+            }
+            
+            try {
+                updateStatus('Loading realtors...');
+                currentDatabase = dbName;
+                
+                // Load generated pages
+                const pagesResponse = await fetch('/api/pages');
+                const { pages } = await pagesResponse.json();
+                
+                // Filter pages for current database
+                realtorPages = pages.filter(page => page.database === dbName.replace('.db', ''));
+                
+                displayPageList();
+                updateStatus(`Loaded ${realtorPages.length} realtor pages for ${dbName}`);
+            } catch (error) {
+                updateStatus('Error loading realtors: ' + error.message);
+            }
+        }
+        
+        // Display list of available pages
+        function displayPageList() {
+            const container = document.getElementById('page-list-container');
+            const list = document.getElementById('page-list');
+            
+            if (realtorPages.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            list.innerHTML = '';
+            
+            realtorPages.forEach(page => {
+                const item = document.createElement('div');
+                item.className = 'page-item';
+                item.innerHTML = `
+                    <div class="page-info">
+                        <div class="page-name">${page.slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>
+                        <div class="page-details">File: ${page.filename} | Modified: ${new Date(page.modified).toLocaleDateString()}</div>
+                    </div>
+                `;
+                
+                item.addEventListener('click', function() {
+                    loadPageInEditor(page);
+                    
+                    // Update active state
+                    list.querySelectorAll('.page-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                });
+                
+                list.appendChild(item);
+            });
+        }
+        
+        // Load a page in the editor
+        function loadPageInEditor(page) {
+            currentRealtor = page;
+            document.getElementById('current-page').textContent = page.slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            
+            const frame = document.getElementById('editor-frame');
+            frame.src = page.url;
+            
+            updateStatus(`Editing: ${page.filename}`);
+        }
+        
+        // Make an element editable
+        function makeEditable(element) {
+            const field = element.getAttribute('data-vvebjs-field');
+            const component = element.getAttribute('data-vvebjs-component');
+            
+            if (component === 'text') {
+                const currentText = element.textContent;
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = currentText;
+                input.style.width = '100%';
+                input.style.padding = '4px';
+                input.style.border = '2px solid #667eea';
+                input.style.borderRadius = '4px';
+                
+                element.textContent = '';
+                element.appendChild(input);
+                input.focus();
+                
+                function finishEdit() {
+                    const newText = input.value;
+                    element.textContent = newText;
+                    updateStatus(`Updated ${field}: ${newText}`);
+                }
+                
+                input.addEventListener('blur', finishEdit);
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        finishEdit();
+                    }
+                });
+            } else if (component === 'image') {
+                const newUrl = prompt('Enter new image URL:', element.src);
+                if (newUrl && newUrl !== element.src) {
+                    element.src = newUrl;
+                    updateStatus(`Updated image: ${field}`);
+                }
+            } else if (component === 'link') {
+                const newUrl = prompt('Enter new link URL:', element.href);
+                if (newUrl && newUrl !== element.href) {
+                    element.href = newUrl;
+                    updateStatus(`Updated link: ${field}`);
+                }
+            }
+        }
+        
+        // Save the current page
+        async function savePage() {
+            if (!currentRealtor) {
+                alert('No page selected');
+                return;
+            }
+            
+            try {
+                const frame = document.getElementById('editor-frame');
+                const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                const html = frameDoc.documentElement.outerHTML;
+                
+                updateStatus('Saving page...');
+                
+                // Here you would implement the save functionality
+                // For now, we'll just show success
+                setTimeout(() => {
+                    updateStatus('Page saved successfully!');
+                }, 1000);
+                
+            } catch (error) {
+                updateStatus('Error saving page: ' + error.message);
+            }
+        }
+        
+        // Generate new pages
+        async function generateNew() {
+            if (!currentDatabase) {
+                alert('Please select a database first');
+                return;
+            }
+            
+            if (!confirm(`Generate new pages for all realtors in ${currentDatabase}?`)) {
+                return;
+            }
+            
+            try {
+                updateStatus('Generating new pages...');
+                
+                const response = await fetch(`/api/generate/database/${currentDatabase}`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    updateStatus(`Generated ${result.results.successfulPages} new pages!`);
+                    loadRealtors(); // Refresh the list
+                } else {
+                    updateStatus('Error generating pages: ' + result.error);
+                }
+            } catch (error) {
+                updateStatus('Error generating pages: ' + error.message);
+            }
+        }
+        
+        // Refresh the current page
+        function refreshPage() {
+            if (currentRealtor) {
+                loadPageInEditor(currentRealtor);
+            } else {
+                location.reload();
+            }
+        }
+        
+        // Update status message
+        function updateStatus(message) {
+            document.getElementById('status-text').textContent = message;
+            console.log('Status:', message);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+# Notification Sound Placeholder
+# 
+# This file serves as a placeholder for notification2.mp3
+# The script will attempt to play this file, but will fall back to system beep
+# if no audio player is available.
+#
+# To add a real notification sound:
+# 1. Replace this file with an actual notification2.mp3 audio file
+# 2. Or install mpg123, ffplay, or another audio player
+# 3. The script supports: paplay, aplay, mpg123, ffplay

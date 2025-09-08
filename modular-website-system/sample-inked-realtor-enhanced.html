@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarah Johnson - Inked Realtor Enhanced | Premium Real Estate</title>
+    <meta name="description" content="Premium real estate services with Sarah Johnson. Professional agent specializing in luxury homes with modern design aesthetic inspired by InkedRealEstate.com">
+    
+    <!-- Enhanced CSS with InkedRealEstate.com inspiration -->
+    <style>
+        /* Import Google Fonts - Matching InkedRealEstate.com aesthetic */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
+
+        /* CSS Custom Properties */
+        :root {
+            --primary-blue: #1e40af;
+            --secondary-blue: #1e3a8a;
+            --accent-blue: #3b82f6;
+            --light-blue: #dbeafe;
+            --success-green: #10b981;
+            
+            --black: #000000;
+            --dark-slate: #0f172a;
+            --charcoal: #1e293b;
+            --medium-gray: #64748b;
+            --light-gray: #94a3b8;
+            --border-gray: #e2e8f0;
+            --surface-gray: #f8fafc;
+            --white: #ffffff;
+            
+            --overlay-dark: rgba(15, 23, 42, 0.85);
+            --gradient-primary: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            
+            --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-display: 'Playfair Display', 'Inter', serif;
+            
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-xxl: 3rem;
+            --spacing-xxxl: 4rem;
+            --spacing-mega: 6rem;
+            
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --radius-xxl: 24px;
+            --radius-full: 9999px;
+            
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.1);
+            --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.15);
+            
+            --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Reset and Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background-color: var(--white);
+            color: var(--dark-slate);
+            line-height: 1.7;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-display);
+            line-height: 1.2;
+            color: var(--dark-slate);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 900;
+            letter-spacing: -0.02em;
+        }
+
+        .text-hero {
+            font-size: clamp(3rem, 6vw, 5.5rem);
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            line-height: 0.9;
+            text-transform: uppercase;
+            font-family: var(--font-display);
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-xl);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-lg) var(--spacing-xxl);
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-normal);
+            cursor: pointer;
+            border: 2px solid transparent;
+            min-height: 50px;
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: var(--white);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-xl);
+            filter: brightness(1.1);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--white);
+            border-color: var(--white);
+        }
+
+        .btn-outline:hover {
+            background: var(--white);
+            color: var(--primary-blue);
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero-inked {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--dark-slate) 0%, var(--charcoal) 100%);
+            overflow: hidden;
+        }
+
+        .hero-inked::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+            z-index: 1;
+        }
+
+        .hero-content-inked {
+            text-align: center;
+            max-width: 1000px;
+            z-index: 3;
+            position: relative;
+            color: var(--white);
+        }
+
+        .hero-title-inked {
+            font-size: clamp(4rem, 8vw, 7rem);
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            line-height: 0.9;
+            text-transform: uppercase;
+            font-family: var(--font-display);
+            margin-bottom: var(--spacing-xl);
+            background: linear-gradient(135deg, var(--white) 0%, var(--light-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle-inked {
+            font-size: clamp(1.25rem, 2.5vw, 2rem);
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: var(--spacing-xxxl);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Stats Section */
+        .stats-inked {
+            background: var(--surface-gray);
+            padding: var(--spacing-mega) 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-xl);
+        }
+
+        .stat-item {
+            background: var(--white);
+            border: 1px solid var(--border-gray);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xxxl) var(--spacing-xl);
+            text-align: center;
+            transition: all var(--transition-normal);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-8px);
+            border-color: var(--primary-blue);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .stat-value {
+            font-size: clamp(3rem, 5vw, 4rem);
+            font-weight: 900;
+            color: var(--primary-blue);
+            margin-bottom: var(--spacing-md);
+            line-height: 1;
+            font-family: var(--font-display);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--medium-gray);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Property Grid */
+        .property-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: var(--spacing-xl);
+            margin-top: var(--spacing-xxxl);
+        }
+
+        .property-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            transition: all var(--transition-normal);
+            border: 1px solid var(--border-gray);
+        }
+
+        .property-card:hover {
+            transform: translateY(-12px);
+            box-shadow: var(--shadow-2xl);
+            border-color: var(--primary-blue);
+        }
+
+        .property-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .property-card:hover .property-image {
+            transform: scale(1.1);
+        }
+
+        .property-content {
+            padding: var(--spacing-xl);
+        }
+
+        .property-price {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--primary-blue);
+            margin-bottom: var(--spacing-sm);
+            font-family: var(--font-display);
+        }
+
+        /* Section styles */
+        .section {
+            padding: 120px 0;
+        }
+
+        .section-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+            margin-bottom: var(--spacing-xl);
+            color: var(--dark-slate);
+            text-align: center;
+            line-height: 1.1;
+            font-family: var(--font-display);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(60px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 var(--spacing-md);
+            }
+            
+            .stats-grid,
+            .property-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero-inked">
+        <div class="hero-content-inked">
+            <h1 class="hero-title-inked animate-fade-in-up">WELCOME HOME</h1>
+            <p class="hero-subtitle-inked animate-fade-in-up">LET'S FIND THE RIGHT ONE FOR YOU</p>
+            <div class="animate-fade-in-up">
+                <a href="#contact" class="btn btn-primary">GET STARTED TODAY</a>
+                <a href="#properties" class="btn btn-outline" style="margin-left: 1rem;">VIEW LISTINGS</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-inked">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value">623</div>
+                    <div class="stat-label">Clients Helped</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">$200M</div>
+                    <div class="stat-label">Volume Closed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">15+</div>
+                    <div class="stat-label">Years Experience</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Properties Section -->
+    <section class="section" id="properties">
+        <div class="container">
+            <h2 class="section-title">Featured Properties</h2>
+            <div class="property-grid">
+                <div class="property-card">
+                    <img src="https://via.placeholder.com/400x300/1e40af/ffffff?text=Luxury+Home" alt="Property" class="property-image">
+                    <div class="property-content">
+                        <div class="property-price">$450,000</div>
+                        <div style="color: var(--medium-gray); font-size: 14px;">123 Oak Street</div>
+                    </div>
+                </div>
+                <div class="property-card">
+                    <img src="https://via.placeholder.com/400x300/10b981/ffffff?text=Modern+Home" alt="Property" class="property-image">
+                    <div class="property-content">
+                        <div class="property-price">$325,000</div>
+                        <div style="color: var(--medium-gray); font-size: 14px;">456 Pine Avenue</div>
+                    </div>
+                </div>
+                <div class="property-card">
+                    <img src="https://via.placeholder.com/400x300/3b82f6/ffffff?text=Family+Home" alt="Property" class="property-image">
+                    <div class="property-content">
+                        <div class="property-price">$575,000</div>
+                        <div style="color: var(--medium-gray); font-size: 14px;">789 Maple Drive</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="section" style="background: var(--surface-gray);">
+        <div class="container" style="text-align: center;">
+            <h2 class="section-title">About Sarah Johnson</h2>
+            <p style="font-size: 1.25rem; color: var(--medium-gray); max-width: 600px; margin: 0 auto;">
+                With over 15 years of experience in luxury real estate, I specialize in helping clients find their dream homes. 
+                My commitment to excellence and personalized service has helped over 623 families achieve their real estate goals.
+            </p>
+            <div style="margin-top: var(--spacing-xxxl);">
+                <a href="#contact" class="btn btn-primary">Contact Me Today</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="section" id="contact" style="background: var(--gradient-primary); color: var(--white);">
+        <div class="container" style="text-align: center;">
+            <h2 class="section-title" style="color: var(--white);">Ready to Get Started?</h2>
+            <p style="font-size: 1.25rem; margin-bottom: var(--spacing-xxxl); opacity: 0.9;">
+                Contact me today for a free consultation about your real estate needs.
+            </p>
+            <div>
+                <a href="tel:+1234567890" class="btn btn-outline" style="margin-right: 1rem;">Call Now</a>
+                <a href="mailto:sarah@example.com" class="btn" style="background: rgba(255,255,255,0.2); color: var(--white); border: 2px solid rgba(255,255,255,0.3);">Email Me</a>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

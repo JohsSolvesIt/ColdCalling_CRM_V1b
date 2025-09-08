@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{NAME}} - {{AGENCY}} | Real Estate Professional</title>
+    <meta name="description" content="{{NAME}} is an experienced real estate agent at {{AGENCY}} with {{EXPERIENCE}} of experience. Contact {{NAME}} at {{PHONE}} for all your real estate needs.">
+    <meta name="keywords" content="{{NAME}}, real estate agent, {{AGENCY}}, property sales, home buying, home selling">
+    
+    <link href="../../css/bootstrap.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #f8f9fa;
+            --text-color: #333;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--accent-color);
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-container {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .profile-image {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 6px solid rgba(255,255,255,0.3);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            object-fit: cover;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-name {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .profile-agency {
+            font-size: 1.4rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            font-weight: 300;
+        }
+
+        .contact-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .contact-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 1rem 2rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .contact-btn:hover {
+            background: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .stats-section {
+            background: white;
+            margin: -3rem auto 3rem;
+            max-width: 1000px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 3rem;
+            position: relative;
+            z-index: 3;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            text-align: center;
+        }
+
+        .stat-item {
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            background: linear-gradient(45deg, #f8f9fa, #ffffff);
+            border: 1px solid #e9ecef;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .content-section {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .about-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            padding: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
+        }
+
+        .about-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 2rem;
+        }
+
+        .profile-link {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .profile-link:hover {
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer-section {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 3rem 0;
+            margin-top: 4rem;
+        }
+
+        @media (max-width: 768px) {
+            .profile-name {
+                font-size: 2.2rem;
+            }
+            
+            .stats-section {
+                margin: -2rem 1rem 2rem;
+                padding: 2rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero-section" data-vvveb-data="{'name': 'hero', 'title': 'Hero Section'}">
+        <div class="container">
+            <div class="profile-container">
+                <img src="{{PROFILE_PIC}}" 
+                     alt="{{NAME}}" 
+                     class="profile-image" 
+                     data-vvveb-data="{'name': 'profile-image', 'title': 'Profile Image'}"
+                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iOTAiIGN5PSI5MCIgcj0iOTAiIGZpbGw9IiNkZGQiLz48dGV4dCB4PSI5MCIgeT0iOTUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+'">
+                
+                <h1 class="profile-name" data-vvveb-data="{'name': 'profile-name', 'title': 'Profile Name'}">
+                    {{NAME}}
+                </h1>
+                
+                <p class="profile-agency" data-vvveb-data="{'name': 'profile-agency', 'title': 'Agency Name'}">
+                    {{AGENCY}}
+                </p>
+                
+                <div class="contact-buttons">
+                    <a href="tel:{{PHONE}}" class="contact-btn">
+                        📞 {{PHONE}}
+                    </a>
+                    <a href="{{REALTOR_COM}}" target="_blank" class="contact-btn">
+                        🔗 View Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <div class="container">
+        <section class="stats-section" data-vvveb-data="{'name': 'stats', 'title': 'Statistics Section'}">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number">{{EXPERIENCE}}</span>
+                    <div class="stat-label">Experience</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{FOR_SALE}}</span>
+                    <div class="stat-label">For Sale</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{SOLD}}</span>
+                    <div class="stat-label">Properties Sold</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- About Section -->
+    <div class="content-section">
+        <div class="about-card" data-vvveb-data="{'name': 'about-section', 'title': 'About Section'}">
+            <h2 class="section-title">About {{NAME}}</h2>
+            
+            <div class="about-text">
+                <p>{{NAME}} is a dedicated real estate professional with {{EXPERIENCE}} of experience in the industry. 
+                As a valued member of {{AGENCY}}, {{NAME}} has successfully helped clients achieve their real estate goals 
+                with {{SOLD}} completed transactions and {{FOR_SALE}} current listings.</p>
+                
+                <p>Whether you're a first-time homebuyer, looking to sell your current property, or seeking investment 
+                opportunities, {{NAME}} brings the expertise, dedication, and local market knowledge needed to achieve 
+                your real estate objectives.</p>
+            </div>
+
+            <a href="{{REALTOR_COM}}" target="_blank" class="profile-link">
+                View Complete Profile
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer-section">
+        <div class="container">
+            <p>&copy; 2025 {{NAME}} - {{AGENCY}}. Professional Real Estate Services.</p>
+            <p><small>Last updated: {{LAST_UPDATED}}</small></p>
+        </div>
+    </footer>
+
+    <script>
+        console.log('Realtor page loaded for {{NAME}}');
+    </script>
+</body>
+</html>

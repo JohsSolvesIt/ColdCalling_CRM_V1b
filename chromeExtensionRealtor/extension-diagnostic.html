@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Extension Loading Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .code { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 3px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Extension Loading Diagnostic</h1>
+    
+    <div id="status-content">
+        <p>Loading diagnostic information...</p>
+    </div>
+    
+    <div class="code">
+        <strong>Instructions to reload extension:</strong><br>
+        1. Open new tab: chrome://extensions/<br>
+        2. Find "Realtor Data Extractor" extension<br>
+        3. Click the "Reload" button (circular arrow icon)<br>
+        4. Refresh this realtor.com page<br>
+        5. Check console for extension loading messages
+    </div>
+
+    <script>
+        function runDiagnostic() {
+            const statusDiv = document.getElementById('status-content');
+            let html = '';
+            
+            // Test 1: Check if content scripts are loaded
+            html += '<h3>📋 Content Script Status</h3>';
+            
+            if (typeof window.log !== 'undefined') {
+                html += '<div class="status success">✅ Logging utility loaded</div>';
+            } else {
+                html += '<div class="status error">❌ Logging utility NOT loaded</div>';
+            }
+            
+            if (typeof window.ContactExtractor !== 'undefined') {
+                html += '<div class="status success">✅ ContactExtractor module loaded</div>';
+            } else {
+                html += '<div class="status error">❌ ContactExtractor module NOT loaded</div>';
+            }
+            
+            if (typeof window.RealtorDataExtractor !== 'undefined') {
+                html += '<div class="status success">✅ RealtorDataExtractor class loaded</div>';
+            } else {
+                html += '<div class="status error">❌ RealtorDataExtractor class NOT loaded</div>';
+            }
+            
+            if (typeof window.extractor !== 'undefined') {
+                html += '<div class="status success">✅ Extractor instance created</div>';
+            } else {
+                html += '<div class="status error">❌ Extractor instance NOT created</div>';
+            }
+            
+            // Test 2: Check if extraction button exists
+            html += '<h3>🔘 Extension UI Status</h3>';
+            const button = document.getElementById('realtor-extractor-btn');
+            if (button) {
+                html += '<div class="status success">✅ Extraction button found in DOM</div>';
+            } else {
+                html += '<div class="status error">❌ Extraction button NOT found in DOM</div>';
+            }
+            
+            // Test 3: Test extraction functionality
+            html += '<h3>📞 Contact Extraction Test</h3>';
+            if (typeof window.ContactExtractor !== 'undefined') {
+                try {
+                    const phone = window.ContactExtractor.extractCleanPhone();
+                    if (phone && phone !== 'Not found') {
+                        html += `<div class="status success">✅ Phone extraction works: ${phone}</div>`;
+                    } else {
+                        html += '<div class="status warning">⚠️ Phone extraction returns: Not found</div>';
+                    }
+                } catch (error) {
+                    html += `<div class="status error">❌ Phone extraction error: ${error.message}</div>`;
+                }
+                
+                try {
+                    const email = window.ContactExtractor.extractCleanEmail();
+                    if (email && email !== 'Not found') {
+                        html += `<div class="status success">✅ Email extraction works: ${email}</div>`;
+                    } else {
+                        html += '<div class="status warning">⚠️ Email extraction returns: Not found</div>';
+                    }
+                } catch (error) {
+                    html += `<div class="status error">❌ Email extraction error: ${error.message}</div>`;
+                }
+            } else {
+                html += '<div class="status error">❌ Cannot test extraction - ContactExtractor not loaded</div>';
+            }
+            
+            // Test 4: Manual phone search
+            html += '<h3>🔍 Manual Phone Search</h3>';
+            const phoneLinks = document.querySelectorAll('a[href^="tel:"]');
+            if (phoneLinks.length > 0) {
+                html += `<div class="status success">✅ Found ${phoneLinks.length} tel: links</div>`;
+                phoneLinks.forEach((link, index) => {
+                    html += `<div class="status success">📞 Tel link ${index + 1}: ${link.href}</div>`;
+                });
+            } else {
+                html += '<div class="status warning">⚠️ No tel: links found</div>';
+            }
+            
+            // Test 5: Console log analysis
+            html += '<h3>📊 Console Analysis</h3>';
+            html += '<div class="status warning">⚠️ Check browser console for extension loading messages</div>';
+            html += '<div class="status warning">⚠️ Look for "✅ ContactExtractor module loaded" message</div>';
+            html += '<div class="status warning">⚠️ Look for "🚀 Realtor Data Extractor content script loaded" message</div>';
+            
+            statusDiv.innerHTML = html;
+        }
+        
+        // Run diagnostic when page loads
+        setTimeout(runDiagnostic, 1000);
+        
+        // Re-run every 5 seconds to catch late-loading scripts
+        setInterval(runDiagnostic, 5000);
+    </script>
+</body>
+</html>

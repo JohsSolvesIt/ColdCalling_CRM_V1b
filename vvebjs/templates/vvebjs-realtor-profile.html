@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="{{REALTOR_NAME}} - {{REALTOR_COMPANY}} | Professional Real Estate Agent">
+    <meta name="author" content="{{REALTOR_NAME}}">
+    <title>{{REALTOR_NAME}} - {{REALTOR_COMPANY}} | Real Estate Professional</title></title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- VvebJS Editor CSS for components -->
+    <link href="../../css/editor.css" rel="stylesheet">
+    
+    <!-- Custom styles using VvebJS pattern -->
+    <style>
+        :root {
+            --vveb-primary: #667eea;
+            --vveb-secondary: #764ba2;
+            --vveb-accent: #f8f9fa;
+            --vveb-dark: #333;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        
+        /* VvebJS component styling */
+        .vveb-component {
+            position: relative;
+        }
+        
+        .vveb-section {
+            padding: 4rem 0;
+        }
+    </style>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+</head>
+<body>
+
+<!-- VvebJS Hero Section Component -->
+<section data-name="hero-section" class="vveb-section vveb-component" style="background: linear-gradient(135deg, var(--vveb-primary) 0%, var(--vveb-secondary) 100%); color: white; min-height: 60vh;">
+    <div class="container">
+        <div class="row align-items-center justify-content-center text-center">
+            <div class="col-lg-8">
+                <div class="vveb-component" data-name="profile-image-container" style="margin-bottom: 2rem;">
+                    <img src="{{REALTOR_PROFILE_IMAGE}}" 
+                         alt="{{REALTOR_NAME}} - Real Estate Professional" 
+                         class="vveb-component rounded-circle border border-light border-4 shadow-lg"
+                         style="width: 200px; height: 200px; object-fit: cover;"
+                         onerror="this.src='../../img/default-avatar.svg'">
+                </div>
+                <div class="vveb-component" data-name="hero-text">
+                    <h1 class="display-4 fw-bold mb-3">{{REALTOR_NAME}}</h1>
+                    <p class="lead mb-4">{{REALTOR_TITLE}} at {{REALTOR_COMPANY}}</p>
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a href="tel:{{REALTOR_PHONE}}" class="btn btn-light btn-lg vveb-component" data-name="phone-btn">
+                            <i class="bi bi-telephone"></i> {{REALTOR_PHONE}}
+                        </a>
+                        <a href="mailto:{{REALTOR_EMAIL}}" class="btn btn-outline-light btn-lg vveb-component" data-name="email-btn">
+                            <i class="bi bi-envelope"></i> Email Me
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- VvebJS About Section Component -->
+<section data-name="about-section" class="vveb-section vveb-component bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="vveb-component text-center mb-5" data-name="section-header">
+                    <h2 class="display-5 fw-bold mb-3">About {{REALTOR_NAME}}</h2>
+                    <p class="lead text-muted">Dedicated to helping you find your perfect home</p>
+                </div>
+                
+                <div class="vveb-component" data-name="about-content">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="vveb-component card h-100 border-0 shadow-sm" data-name="experience-card">
+                                <div class="card-body text-center">
+                                    <div class="display-6 text-primary mb-3">🏠</div>
+                                    <h5 class="card-title">Experience</h5>
+                                    <p class="card-text">{{REALTOR_EXPERIENCE}} years in real estate</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="vveb-component card h-100 border-0 shadow-sm" data-name="specialization-card">
+                                <div class="card-body text-center">
+                                    <div class="display-6 text-primary mb-3">⭐</div>
+                                    <h5 class="card-title">Specialization</h5>
+                                    <p class="card-text">{{REALTOR_SPECIALIZATIONS}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- VvebJS Services Section Component -->
+<section data-name="services-section" class="vveb-section vveb-component">
+    <div class="container">
+        <div class="vveb-component text-center mb-5" data-name="services-header">
+            <h2 class="display-5 fw-bold mb-3">My Services</h2>
+            <p class="lead text-muted">Comprehensive real estate solutions for all your needs</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="vveb-component card h-100 border-0 shadow-sm" data-name="buying-service">
+                    <div class="card-body text-center">
+                        <div class="display-6 text-primary mb-3">🔍</div>
+                        <h5 class="card-title">Home Buying</h5>
+                        <p class="card-text">Expert guidance through the home buying process, from search to closing.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="vveb-component card h-100 border-0 shadow-sm" data-name="selling-service">
+                    <div class="card-body text-center">
+                        <div class="display-6 text-primary mb-3">💰</div>
+                        <h5 class="card-title">Home Selling</h5>
+                        <p class="card-text">Strategic marketing and pricing to sell your home quickly and for top dollar.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mx-auto">
+                <div class="vveb-component card h-100 border-0 shadow-sm" data-name="consultation-service">
+                    <div class="card-body text-center">
+                        <div class="display-6 text-primary mb-3">📊</div>
+                        <h5 class="card-title">Market Analysis</h5>
+                        <p class="card-text">Detailed market analysis and property valuations for informed decisions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- VvebJS Contact Section Component -->
+<section data-name="contact-section" class="vveb-section vveb-component" style="background: linear-gradient(135deg, var(--vveb-primary) 0%, var(--vveb-secondary) 100%); color: white;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <div class="vveb-component" data-name="contact-header">
+                    <h2 class="display-5 fw-bold mb-4">Ready to Get Started?</h2>
+                    <p class="lead mb-5">Contact me today for a free consultation</p>
+                </div>
+                
+                <div class="vveb-component" data-name="contact-info">
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="vveb-component" data-name="phone-contact">
+                                <div class="display-6 mb-3">📞</div>
+                                <h5>Phone</h5>
+                                <p><a href="tel:{{REALTOR_PHONE}}" class="text-white text-decoration-none">{{REALTOR_PHONE}}</a></p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="vveb-component" data-name="email-contact">
+                                <div class="display-6 mb-3">✉️</div>
+                                <h5>Email</h5>
+                                <p><a href="mailto:{{REALTOR_EMAIL}}" class="text-white text-decoration-none">{{REALTOR_EMAIL}}</a></p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="vveb-component" data-name="office-contact">
+                                <div class="display-6 mb-3">🏢</div>
+                                <h5>Office</h5>
+                                <p>{{REALTOR_COMPANY}}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vveb-component mt-5" data-name="cta-buttons">
+                    <a href="tel:{{REALTOR_PHONE}}" class="btn btn-light btn-lg me-3 vveb-component" data-name="call-now-btn">
+                        Call Now
+                    </a>
+                    <a href="mailto:{{REALTOR_EMAIL}}" class="btn btn-outline-light btn-lg vveb-component" data-name="email-now-btn">
+                        Send Email
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- VvebJS Footer Component -->
+<footer data-name="footer-section" class="vveb-component bg-dark text-light py-4">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="vveb-component" data-name="footer-info">
+                    <p class="mb-0">&copy; 2024 {{REALTOR_NAME}} - {{REALTOR_COMPANY}}. All rights reserved.</p>
+                </div>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <div class="vveb-component" data-name="footer-links">
+                    <small class="text-muted">Professional Real Estate Services</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- VvebJS Editor Scripts (conditionally loaded) -->
+<script>
+// VvebJS component detection and editor integration
+if (window.location.search.includes('edit=true') || window.location.hash.includes('edit')) {
+    // Load VvebJS editor components
+    const vvebScripts = [
+        '../../libs/builder/builder.js',
+        '../../libs/builder/components-bootstrap5.js',
+        '../../libs/builder/sections-bootstrap4.js'
+    ];
+    
+    vvebScripts.forEach(src => {
+        const script = document.createElement('script');
+        script.src = src;
+        document.head.appendChild(script);
+    });
+    
+    // Initialize VvebJS editor mode
+    window.addEventListener('load', function() {
+        if (typeof Vvveb !== 'undefined') {
+            // Mark all components as editable
+            document.querySelectorAll('.vveb-component').forEach(el => {
+                el.setAttribute('data-vveb-editable', 'true');
+            });
+            
+            console.log('VvebJS editor components loaded and ready');
+        }
+    });
+}
+
+// Smooth scrolling for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+</script>
+
+</body>
+</html>

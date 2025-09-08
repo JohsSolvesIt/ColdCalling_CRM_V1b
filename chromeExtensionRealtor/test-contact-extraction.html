@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Contact Extraction - Realtor Extension</title>
+</head>
+<body>
+    <h1>Test Page for Contact Extraction</h1>
+    
+    <!-- Mock realtor contact information -->
+    <div class="agent-contact">
+        <h2>Agent: Becky Prescott</h2>
+        <p>Phone: (207) 942-6711</p>
+        <p>Email: becky.prescott@example.com</p>
+        <p>Office: Cold Stream Real Estate</p>
+    </div>
+    
+    <!-- Alternative contact formats -->
+    <div class="contact-info">
+        <span>Call: + (207) 942-6711</span>
+        <span>Email: becky@coldstream.com</span>
+    </div>
+    
+    <script>
+        // Test script to verify extension loading
+        console.log('🔍 Test page loaded');
+        
+        // Wait for extension to load
+        setTimeout(() => {
+            console.log('🎯 Checking if ContactExtractor is available...');
+            if (typeof window.ContactExtractor !== 'undefined') {
+                console.log('✅ ContactExtractor module loaded successfully');
+                
+                // Test phone extraction
+                const extractor = new window.ContactExtractor();
+                const phone = extractor.extractCleanPhone();
+                console.log('📞 Extracted phone:', phone);
+                
+                const email = extractor.extractCleanEmail();
+                console.log('📧 Extracted email:', email);
+                
+                const office = extractor.extractOfficeData();
+                console.log('🏢 Extracted office:', office);
+            } else {
+                console.log('❌ ContactExtractor not available');
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
+</script>
+</body>
+</html>

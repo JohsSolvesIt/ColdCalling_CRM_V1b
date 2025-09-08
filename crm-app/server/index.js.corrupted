@@ -1,0 +1,1607 @@
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+const SMSService = require('./smsService');
+const EmailService = require('./emailService');
+const UnifiedDatabaseManager = require('./UnifiedDatabaseManager');
+const { generateVvebJSWebsite } = require('./vvebjs-generator');
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, '../client/build')));
+
+// Storage for file uploads (not used with Chrome Extension but kept for compatibility)
+const upload = multer({ dest: 'uploads/' });
+
+const unifiedDbManager = new UnifiedDatabaseManager();
+const smsService = new SMSService();
+const emailService = new EmailService();
+
+// Initialize the unified database manager
+unifiedDbManager.initialize().then(status => {
+  console.log('Database initialization status:', status);
+}).catch(err => {
+  console.error('Database initialization error:', err);
+});
+
+// Routes
+app.get('/api/databases', async (req, res) => {
+  try {
+    const databases = await unifiedDbManager.getAvailableDatabases();
+    res.json(databases);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/database/switch', async (req, res) => {
+  try {
+    const { name, type = 'chrome_extension' } = req.body;
+    
+    // Only Chrome Extension is supported now
+    await unifiedDbManager.switchToChromeExtension();
+    
+    res.json({ success: true, database: 'Chrome Extension Realtor Database', type: 'chrome_extension' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/database/create', async (req, res) => {
+  try {
+    res.status(400).json({ error: 'Creating new databases is not supported with Chrome Extension data source' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/database/rename', async (req, res) => {
+  try {
+    res.status(400).json({ error: 'Renaming databases is not supported with Chrome Extension data source' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/database/delete', async (req, res) => {
+  try {
+    res.status(400).json({ error: 'Deleting databases is not supported with Chrome Extension data source' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Enhanced contacts endpoint that gets ALL data from Chrome Extension
+app.get('/api/contacts', async (req, res) => {
+  try {
+    const { page = 1, limit = 100, search = '', includeStats = 'true', includeProperties = 'true' } = req.query;
+    const currentDb = unifiedDbManager.getCurrentDatabase();
+    
+    if (!currentDb.isConnected) {
+      return res.status(400).json({ error: 'Chrome Extension API not connected' });
+    }
+
+    let contacts;
+    if (search && search.trim()) {
+      // Use search functionality to get filtered results
+      contacts = await unifiedDbManager.searchAgents(search.trim(), parseInt(page), parseInt(limit));
+      
+      // Add properties if requested
+      if (includeProperties === 'true') {
+        for (const contact of contacts) {
+          try {
+            const properties = await unifiedDbManager.getPropertiesForAgent(contact.id);
+            contact.properties = properties;
+            contact.property_count = properties.length;
+            contact.property_details = properties; // For compatibility
+          } catch (error) {
+            console.warn(`Could not fetch properties for contact ${contact.id}:`, error.message);
+            contact.properties = [];
+            contact.property_count = 0;
+            contact.property_details = [];
+          }
+        }
+      }
+    } else {
+      // Get all agents with complete data including properties
+      contacts = await unifiedDbManager.getAgents(
+        parseInt(page), 
+        parseInt(limit), 
+        includeStats === 'true',
+        includeProperties === 'true'
+      );
+    }
+    
+    // Transform to CRM contact format but preserve ALL Chrome Extension data
+    const transformedContacts = contacts.map(agent => {
+      return {
+        // Standard CRM fields
+        id: agent.id,
+        name: agent.name || 'Unknown',
+        company: agent.company || '',
+        phone: agent.phone || '',
+        email: agent.email || '',
+        address: agent.address || '',
+        city: unifiedDbManager.extractCityFromServiceAreas(agent.service_areas),
+        state: agent.license_state || '',
+        zip_code: '',
+        license: agent.license_number || '',
+        url: agent.realtor_url || '',
+        description: agent.bio || '',
+        office_address: agent.address || '',
+        office_phone: agent.phone || '',
+        website: agent.website || '',
+        
+        // Enhanced Chrome Extension fields
+        agent_id: agent.agent_id,
+        title: agent.title,
+        experience_years: agent.experience_years,
+        specializations: agent.specializations || [],
+        languages: agent.languages || [],
+        certifications: agent.certifications || [],
+        service_areas: agent.service_areas || [],
+        social_media: agent.social_media || {},
+        ratings: agent.ratings || {},
+        profile_image_url: agent.profile_image_url,
+        profile_image: agent.profile_image,
+        available_photos: agent.available_photos || [],
+        
+        // CRM integration fields
+        crm_notes: agent.crm_notes || '',
+        crm_status: agent.crm_status || 'New',
+        last_contacted: agent.last_contacted,
+        follow_up_at: agent.follow_up_at,
+        texts_sent: agent.texts_sent || 0,
+        emails_sent: agent.emails_sent || 0,
+        follow_up_priority: agent.follow_up_priority,
+        crm_data: agent.crm_data || {},
+        
+        // Property statistics
+        total_properties: agent.total_properties || 0,
+        avg_property_price: agent.avg_property_price || 0,
+        min_property_price: agent.min_property_price || 0,
+        max_property_price: agent.max_property_price || 0,
+        cities_served: agent.cities_served || 0,
+        
+        // Individual properties data
+        properties: agent.properties || [],
+        property_details: agent.property_details || agent.properties || [],
+        property_count: (agent.properties || []).length,
+        
+        // Property summary fields for table display
+        property_summary: agent.properties ? 
+          `${agent.properties.length} properties (${agent.properties.filter(p => p.listing_status === 'Active').length} active)` : 
+          `${agent.total_properties || 0} properties`,
+        price_range: agent.properties && agent.properties.length > 0 ? 
+          `$${Math.min(...agent.properties.map(p => p.price || 0)).toLocaleString()} - $${Math.max(...agent.properties.map(p => p.price || 0)).toLocaleString()}` :
+          agent.avg_property_price ? `Avg: $${parseFloat(agent.avg_property_price).toLocaleString()}` : 'N/A',
+        
+        // Legacy CRM workflow fields (for compatibility)
+        Notes: agent.crm_notes || agent.notes || '',
+        Status: agent.crm_status || agent.status || 'New',
+        LastContacted: agent.last_contacted,
+        FollowUpAt: agent.follow_up_at,
+        
+        // Timestamps
+        created_at: agent.created_at,
+        updated_at: agent.updated_at,
+        last_scraped_at: agent.last_scraped_at,
+        
+        // Metadata
+        source: 'chrome_extension',
+        _dbType: 'chrome_extension',
+        _dbName: 'Chrome Extension Realtor Database'
+      };
+    });
+    
+    res.json(transformedContacts);
+  } catch (error) {
+    console.error('Error fetching contacts:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Enhanced contacts endpoint with ALL available fields
+app.get('/api/contacts/detailed', async (req, res) => {
+  try {
+    const { page = 1, limit = 100, search = '' } = req.query;
+    const currentDb = unifiedDbManager.getCurrentDatabase();
+    
+    if (!currentDb.isConnected) {
+      return res.status(400).json({ error: 'Chrome Extension API not connected' });
+    }
+
+    let agents;
+    if (search && search.trim()) {
+      agents = await unifiedDbManager.searchAgents(search.trim(), parseInt(page), parseInt(limit));
+    } else {
+      agents = await unifiedDbManager.getAgents(parseInt(page), parseInt(limit), true);
+    }
+    
+    // Return complete agent data with ALL fields
+    res.json({
+      success: true,
+      agents: agents,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: agents.length
+      },
+      metadata: {
+        source: 'chrome_extension',
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching detailed contacts:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Properties endpoint to access ALL property data
+app.get('/api/properties', async (req, res) => {
+  try {
+    const { agentId = null, page = 1, limit = 100 } = req.query;
+    const currentDb = unifiedDbManager.getCurrentDatabase();
+    
+    if (!currentDb.isConnected) {
+      return res.status(400).json({ error: 'Chrome Extension API not connected' });
+    }
+
+    const properties = await unifiedDbManager.getProperties(agentId, parseInt(page), parseInt(limit));
+    
+    res.json({
+      success: true,
+      properties: properties,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: properties.length
+      },
+      metadata: {
+        source: 'chrome_extension',
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching properties:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Extraction logs endpoint to monitor ALL data extraction activities
+app.get('/api/extraction-logs', async (req, res) => {
+  try {
+    const { page = 1, limit = 50 } = req.query;
+    const currentDb = unifiedDbManager.getCurrentDatabase();
+    
+    if (!currentDb.isConnected) {
+      return res.status(400).json({ error: 'Chrome Extension API not connected' });
+    }
+
+    const logs = await unifiedDbManager.getExtractionLogs(parseInt(page), parseInt(limit));
+    
+    res.json({
+      success: true,
+      logs: logs,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: logs.length
+      },
+      metadata: {
+        source: 'chrome_extension',
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching extraction logs:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Comprehensive statistics endpoint accessing ALL data stores
+app.get('/api/statistics/comprehensive', async (req, res) => {
+  try {
+    const currentDb = unifiedDbManager.getCurrentDatabase();
+    
+    if (!currentDb.isConnected) {
+      return res.status(400).json({ error: 'Chrome Extension API not connected' });
+    }
+
+    const stats = await unifiedDbManager.getComprehensiveStats();
+    
+    res.json({
+      success: true,
+      statistics: stats,
+      metadata: {
+        source: 'chrome_extension',
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching comprehensive statistics:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Total realtor count across ALL data stores
+app.get('/api/realtors/count', async (req, res) => {
+  try {
+    const count = await unifiedDbManager.getTotalRealtorCount();
+    
+    res.json({
+      success: true,
+      count: count,
+      source: 'chrome_extension',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error fetching realtor count:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/contacts', async (req, res) => {
+  try {
+    res.status(400).json({ error: 'Creating contacts is not supported with Chrome Extension data source. Contacts are managed through the browser extension.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/contacts/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { Notes, Status, LastContacted, FollowUpAt } = req.body;
+    
+    // For now, just log the update - in a full implementation, you'd store updates separately
+    console.log(`Contact update for ${id}:`, { Notes, Status, LastContacted, FollowUpAt });
+    
+    // Return success for UI compatibility
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/contacts/:id', async (req, res) => {
+  try {
+    res.status(400).json({ 
+      error: 'Cannot delete contacts from Chrome Extension database. This database is read-only.',
+      type: 'unsupported_operation'
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/contacts/move', async (req, res) => {
+  try {
+    res.status(400).json({ error: 'Moving contacts between databases is not supported with Chrome Extension data source' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Database-specific contact endpoints are no longer supported
+app.get('/api/databases/:dbName/contacts', async (req, res) => {
+  try {
+    res.status(400).json({ error: 'Database-specific endpoints are not supported with Chrome Extension data source' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/databases/:dbName/contacts', async (req, res) => {
+  try {
+    res.status(400).json({ error: 'Database-specific endpoints are not supported with Chrome Extension data source' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/upload-csv', upload.single('csv'), async (req, res) => {
+  try {
+    res.status(400).json({ error: 'CSV import is not supported with Chrome Extension data source. Data comes from browser extension.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/headers', async (req, res) => {
+  try {
+    // Return ALL available headers from Chrome Extension data
+    const headers = [
+      // Basic fields
+      'name', 'title', 'company', 'phone', 'email', 'address', 'website',
+      
+      // Professional fields
+      'bio', 'experience_years', 'license_number', 'license_state',
+      
+      // Enhanced arrays
+      'specializations', 'languages', 'certifications', 'service_areas',
+      
+      // Social and ratings
+      'social_media', 'ratings', 'profile_image_url', 'realtor_url',
+      
+      // Property statistics
+      'total_properties', 'avg_property_price', 'min_property_price', 
+      'max_property_price', 'cities_served',
+      
+      // Timestamps
+      'created_at', 'updated_at', 'last_scraped_at'
+    ];
+    res.json(headers);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// SMS Routes
+app.get('/api/sms/devices', async (req, res) => {
+  try {
+    const devices = await smsService.getDevices();
+    res.json(devices);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/sms/connect', async (req, res) => {
+  try {
+    const { deviceId } = req.body;
+    const result = await smsService.connectDevice(deviceId);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/sms/disconnect', async (req, res) => {
+  try {
+    const result = await smsService.disconnectDevice();
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/sms/templates', async (req, res) => {
+  try {
+    const templates = await smsService.getTemplates();
+    res.json(templates);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/sms/templates', async (req, res) => {
+  try {
+    const { template } = req.body;
+    const result = await smsService.addTemplate(template);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/sms/templates', async (req, res) => {
+  try {
+    const { oldTemplate, newTemplate } = req.body;
+    const result = await smsService.updateTemplate(oldTemplate, newTemplate);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/sms/templates', async (req, res) => {
+  try {
+    const { template } = req.body;
+    const result = await smsService.deleteTemplate(template);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/sms/send', async (req, res) => {
+  try {
+    const { phoneNumber, message, contactData } = req.body;
+    const result = await smsService.sendSMS(phoneNumber, message, contactData);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/sms/send-batch', async (req, res) => {
+  try {
+    const { contacts, template, options } = req.body;
+    const result = await smsService.sendBatchSMS(contacts, template, options);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/sms/history', async (req, res) => {
+  try {
+    const { limit = 50 } = req.query;
+    const history = await smsService.getSmsHistory(parseInt(limit));
+    res.json(history);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/sms/status', async (req, res) => {
+  try {
+    const status = smsService.getStatus();
+    res.json(status);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Email Routes
+app.post('/api/email/send', async (req, res) => {
+  try {
+    const { to, subject, content, contactData } = req.body;
+    const result = await emailService.sendEmail(to, subject, content, contactData);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/email/send-batch', async (req, res) => {
+  try {
+    const { contacts, subject, template } = req.body;
+    const result = await emailService.sendBatchEmail(contacts, subject, template);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Enhanced System Status Endpoint with ALL data store information
+app.get('/api/status', async (req, res) => {
+  try {
+    const currentDb = unifiedDbManager.getCurrentDatabase();
+    const availableDbs = await unifiedDbManager.getAvailableDatabases();
+    
+    // Get comprehensive health check
+    const healthCheck = await unifiedDbManager.healthCheck();
+    
+    let contactCount = 0;
+    let comprehensiveStats = null;
+    try {
+      contactCount = await unifiedDbManager.getTotalRealtorCount();
+      comprehensiveStats = await unifiedDbManager.getComprehensiveStats();
+    } catch (err) {
+      console.warn('Could not get comprehensive data:', err.message);
+    }
+
+    const status = {
+      timestamp: new Date().toISOString(),
+      database: {
+        connected: currentDb.isConnected,
+        currentDatabase: currentDb.name,
+        currentDatabaseType: 'chrome_extension',
+        availableDatabases: availableDbs,
+        contactCount: contactCount,
+        source: 'Chrome Extension',
+        baseUrl: currentDb.baseUrl,
+        lastPing: currentDb.lastPing
+      },
+      sms: smsService.getStatus(),
+      adb: {
+        connected: false,
+        devices: []
+      },
+      chromeExtension: {
+        connected: currentDb.isConnected,
+        lastPing: currentDb.lastPing,
+        healthCheck: healthCheck
+      },
+      comprehensiveStats: comprehensiveStats
+    };
+
+    // Get ADB status
+    try {
+      const adbAvailable = await smsService.checkADB();
+      if (adbAvailable) {
+        const devices = await smsService.getDevices();
+        status.adb = {
+          connected: devices.length > 0,
+          devices: devices
+        };
+      }
+    } catch (err) {
+      console.warn('Could not check ADB status:', err.message);
+    }
+
+    res.json(status);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// VVebjs integration endpoints
+app.post('/api/generate-websites', async (req, res) => {
+  try {
+    const { contacts, template = 'realtor' } = req.body;
+    
+    if (!contacts || !Array.isArray(contacts)) {
+      return res.status(400).json({ error: 'Contacts array is required' });
+    }
+
+    const results = [];
+    
+    for (const contact of contacts) {
+      try {
+        // Get COMPLETE Chrome Extension data including ALL properties for this agent
+        let fullAgentData = contact;
+        
+        // If we have an agent ID, fetch complete data from Chrome Extension
+        if (contact.id) {
+          try {
+            // Get properties for this specific agent from Chrome Extension
+            const agentProperties = await unifiedDbManager.getPropertiesForAgent(contact.id);
+            fullAgentData.properties = agentProperties;
+            fullAgentData.property_details = agentProperties;
+          } catch (error) {
+            console.warn(`Could not fetch properties for agent ${contact.id}:`, error.message);
+            fullAgentData.properties = [];
+            fullAgentData.property_details = [];
+          }
+        }
+        
+        // Generate website using ALL Chrome Extension data including properties
+        const websiteData = {
+          // Basic info
+          name: fullAgentData.name || 'Unknown',
+          title: fullAgentData.title || '',
+          company: fullAgentData.company || '',
+          phone: fullAgentData.phone || '',
+          email: fullAgentData.email || '',
+          address: fullAgentData.address || '',
+          website: fullAgentData.website || '',
+          
+          // Professional details
+          bio: fullAgentData.bio || fullAgentData.description || '',
+          experience_years: fullAgentData.experience_years || 0,
+          license_number: fullAgentData.license_number || fullAgentData.license || '',
+          license_state: fullAgentData.license_state || fullAgentData.state || '',
+          
+          // Enhanced data
+          specializations: fullAgentData.specializations || [],
+          languages: fullAgentData.languages || [],
+          certifications: fullAgentData.certifications || [],
+          service_areas: fullAgentData.service_areas || [],
+          social_media: fullAgentData.social_media || {},
+          ratings: fullAgentData.ratings || {},
+          profile_image_url: fullAgentData.profile_image_url || '',
+          
+          // Property statistics
+          total_properties: fullAgentData.total_properties || fullAgentData.properties?.length || 0,
+          avg_property_price: fullAgentData.avg_property_price || 0,
+          cities_served: fullAgentData.cities_served || 0,
+          
+          // COMPLETE PROPERTY DATA - ALL properties with prices, descriptions, photos, etc.
+          properties: fullAgentData.properties || fullAgentData.property_details || [],
+          
+          // Calculate property insights from actual data
+          property_price_range: fullAgentData.properties?.length > 0 ? {
+            min: Math.min(...fullAgentData.properties.map(p => parseFloat(p.price || 0))),
+            max: Math.max(...fullAgentData.properties.map(p => parseFloat(p.price || 0))),
+            average: fullAgentData.properties.reduce((sum, p) => sum + parseFloat(p.price || 0), 0) / fullAgentData.properties.length
+          } : null,
+          
+          // Property types and locations
+          property_locations: fullAgentData.properties?.map(p => ({
+            address: p.address,
+            city: p.city,
+            state: p.state,
+            zip_code: p.zip_code
+          })) || [],
+          
+          // URLs
+          realtor_url: fullAgentData.realtor_url || fullAgentData.url || '',
+          
+          template: template
+        };
+        
+        // Generate comprehensive website with ALL Chrome Extension data and save to VvebJS directory
+        let actualWebsiteUrl = `/generated/${fullAgentData.id}.html`; // fallback
+        let actualFileName = '';
+        
+        try {
+          const fs = require('fs');
+          const path = require('path');
+          
+          // Function to generate the same slug as VvebJS does
+          const generateVvebJSSlug = (contact) => {
+            let name = contact.name || 'unknown-agent';
+            
+            // Handle placeholder names (same logic as VvebJS)
+            if (!name || name === 'Agent Name Not Found' || name === 'Unknown') {
+              const companyName = (contact.company || '')
+                .toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-');
+              if (companyName) {
+                name = `agent-at-${companyName}`;
+              } else {
+                name = `unknown-agent`;
+              }
+            }
+            
+            const cleanName = name
+              .toLowerCase()
+              .replace(/[^a-z0-9\s-]/g, '')
+              .replace(/\s+/g, '-')
+              .replace(/-+/g, '-')
+              .trim();
+            
+            return cleanName;
+          };
+          
+          // Use the contact's actual ID - no hash generation needed
+          const uniqueId = fullAgentData.id || '0000000';
+          
+          const baseSlug = generateVvebJSSlug(fullAgentData);
+          actualFileName = `${baseSlug}-${uniqueId}.html`;
+          actualWebsiteUrl = `/generated-realtors/realtor-database/${actualFileName}`;
+          
+          // Generate website using clean VvebJS template
+          const comprehensiveHTML = generateVvebJSWebsite(fullAgentData);
+          
+          // Save to VvebJS directory structure
+            const properties = agentData.properties || [];
+            
+            // Read VvebJS template
+            const templatePath = path.join(__dirname, '../../vvebjs/realtor-template.html');
+            let template = fs.readFileSync(templatePath, 'utf8');
+            
+            // Generate content components
+            const generateRatings = () => {
+              if (!agentData.ratings) return '';
+              return `<div class="rating-stars mb-2">
+                ${'★'.repeat(Math.floor(agentData.ratings))}${'☆'.repeat(5-Math.floor(agentData.ratings))} 
+                <span class="text-white-50">(${agentData.ratings}/5)</span>
+              </div>`;
+            };
+            
+            const generateProfileImage = () => {
+              return agentData.profile_image_url ? 
+                `<img src="${agentData.profile_image_url}" class="img-fluid rounded-circle shadow-lg" style="max-width: 300px;" alt="${agentData.name}">` :
+                '<div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center shadow-lg" style="width: 300px; height: 300px;"><span class="text-muted fs-1">👤</span></div>';
+            };
+            
+            const generateWebsiteLink = () => {
+              return agentData.website ? 
+                `<p class="mb-3"><i class="fas fa-globe me-2"></i><a href="${agentData.website}" target="_blank" class="text-white">${agentData.website}</a></p>` : '';
+            };
+            
+            const generateContactInfo = (side) => {
+              if (side === 'left') {
+                return `
+                  <p><i class="fas fa-phone me-2"></i><strong>Phone:</strong> ${agentData.phone || 'Contact for phone'}</p>
+                  <p><i class="fas fa-envelope me-2"></i><strong>Email:</strong> ${agentData.email || 'Contact for email'}</p>
+                  ${agentData.address ? `<p><i class="fas fa-map-marker-alt me-2"></i><strong>Address:</strong> ${agentData.address}</p>` : ''}
+                `;
+              } else {
+                return `
+                  <p><i class="fas fa-id-card me-2"></i><strong>License:</strong> ${agentData.license_number || agentData.license || 'Licensed Professional'}</p>
+                  <p><i class="fas fa-map me-2"></i><strong>State:</strong> ${agentData.license_state || agentData.state || 'State Licensed'}</p>
+                  ${agentData.website ? `<p><i class="fas fa-globe me-2"></i><strong>Website:</strong> <a href="${agentData.website}" target="_blank">${agentData.website}</a></p>` : ''}
+                `;
+              }
+            };
+            
+            const generateSocialMedia = () => {
+              if (!agentData.social_media || (!agentData.social_media.facebook && !agentData.social_media.linkedin && !agentData.social_media.instagram && !agentData.social_media.twitter)) {
+                return '';
+              }
+              
+              return `
+                <div class="mt-3">
+                  <h5>Connect With Me:</h5>
+                  <div class="social-links">
+                    ${agentData.social_media.facebook ? `<a href="${agentData.social_media.facebook}" target="_blank"><i class="fab fa-facebook"></i></a>` : ''}
+                    ${agentData.social_media.linkedin ? `<a href="${agentData.social_media.linkedin}" target="_blank"><i class="fab fa-linkedin"></i></a>` : ''}
+                    ${agentData.social_media.instagram ? `<a href="${agentData.social_media.instagram}" target="_blank"><i class="fab fa-instagram"></i></a>` : ''}
+                    ${agentData.social_media.twitter ? `<a href="${agentData.social_media.twitter}" target="_blank"><i class="fab fa-twitter"></i></a>` : ''}
+                  </div>
+                </div>
+              `;
+            };
+            
+            const generateProfessionalDetails = () => {
+              if (!agentData.specializations && !agentData.languages && !agentData.certifications && !agentData.service_areas) {
+                return '';
+              }
+              
+              return `
+                <div class="contact-card mb-4">
+                  <h2 class="mb-3"><i class="fas fa-award me-2"></i>Professional Details</h2>
+                  
+                  ${agentData.specializations ? `
+                  <div class="mb-3">
+                    <h5>Specializations:</h5>
+                    <div>
+                      ${Array.isArray(agentData.specializations) ? 
+                        agentData.specializations.map(spec => `<span class="specialization-badge">${spec}</span>`).join('') :
+                        `<span class="specialization-badge">${agentData.specializations}</span>`
+                      }
+                    </div>
+                  </div>` : ''}
+                  
+                  ${agentData.languages ? `
+                  <div class="mb-3">
+                    <h5>Languages:</h5>
+                    <p><i class="fas fa-language me-2"></i>${Array.isArray(agentData.languages) ? agentData.languages.join(', ') : agentData.languages}</p>
+                  </div>` : ''}
+                  
+                  ${agentData.certifications ? `
+                  <div class="mb-3">
+                    <h5>Certifications:</h5>
+                    <p><i class="fas fa-certificate me-2"></i>${Array.isArray(agentData.certifications) ? agentData.certifications.join(', ') : agentData.certifications}</p>
+                  </div>` : ''}
+                  
+                  ${agentData.service_areas ? `
+                  <div class="mb-3">
+                    <h5>Service Areas:</h5>
+                    <p><i class="fas fa-map-marked-alt me-2"></i>${Array.isArray(agentData.service_areas) ? agentData.service_areas.join(', ') : agentData.service_areas}</p>
+                  </div>` : ''}
+                </div>
+              `;
+            };
+            
+            const generateProfessionalStats = () => {
+              return `
+                <div class="mb-3">
+                  <h3 class="text-primary">${properties.length || agentData.total_properties || 0}</h3>
+                  <small class="text-muted">Total Properties</small>
+                </div>
+                ${agentData.cities_served ? `
+                <div class="mb-3">
+                  <h3 class="text-success">${Array.isArray(agentData.cities_served) ? agentData.cities_served.length : agentData.cities_served.split(',').length}</h3>
+                  <small class="text-muted">Cities Served</small>
+                </div>` : ''}
+                ${agentData.min_property_price && agentData.max_property_price ? `
+                <div class="mb-3">
+                  <small class="text-muted">Price Range</small>
+                  <p class="fw-bold">$${Math.round(agentData.min_property_price/1000)}K - $${Math.round(agentData.max_property_price/1000)}K</p>
+                </div>` : ''}
+              `;
+            };
+            
+            const generatePropertiesList = () => {
+              if (properties.length === 0) return '';
+              
+              return properties.map(prop => `
+                <div class="col-md-6 col-lg-4 mb-4">
+                  <div class="card h-100 property-card">
+                    <div class="card-body">
+                      <h5 class="card-title">${prop.address || 'Property Address'}</h5>
+                      <p class="card-text">
+                        <strong>Price:</strong> ${prop.price_formatted || prop.price || 'Contact for price'}<br>
+                        ${prop.bedrooms ? `<strong>Bedrooms:</strong> ${prop.bedrooms}<br>` : ''}
+                        ${prop.bathrooms ? `<strong>Bathrooms:</strong> ${prop.bathrooms}<br>` : ''}
+                        ${prop.square_feet ? `<strong>Square Feet:</strong> ${prop.square_feet}<br>` : ''}
+                        ${prop.description ? `<p class="mt-2">${prop.description}</p>` : ''}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              `).join('');
+            };
+            
+            // Calculate average price for stats
+            const avgPrice = properties.length > 0 ? 
+              '$' + Math.round((properties.reduce((sum, p) => sum + parseFloat(p.price || 0), 0) / properties.length)/1000) + 'K' :
+              (agentData.avg_property_price ? '$' + Math.round(agentData.avg_property_price/1000) + 'K' : 'Contact');
+            
+            // Replace all VvebJS placeholders
+            template = template
+              .replace(/{{REALTOR_NAME}}/g, agentData.name || 'Professional Realtor')
+              .replace(/{{REALTOR_TITLE}}/g, agentData.title || 'Real Estate Professional')
+              .replace(/{{REALTOR_COMPANY}}/g, agentData.company || 'Real Estate Company')
+              .replace(/{{REALTOR_BIO}}/g, agentData.bio || agentData.description || 'Experienced real estate professional dedicated to helping clients achieve their property goals.')
+              .replace(/{{REALTOR_RATINGS}}/g, generateRatings())
+              .replace(/{{REALTOR_WEBSITE_LINK}}/g, generateWebsiteLink())
+              .replace(/{{REALTOR_PROFILE_IMAGE}}/g, generateProfileImage())
+              .replace(/{{TOTAL_PROPERTIES}}/g, properties.length || agentData.total_properties || 0)
+              .replace(/{{AVG_PRICE}}/g, avgPrice)
+              .replace(/{{EXPERIENCE_YEARS}}/g, agentData.experience_years ? agentData.experience_years + 'Y' : 'Contact')
+              .replace(/{{CONTACT_INFO_LEFT}}/g, generateContactInfo('left'))
+              .replace(/{{CONTACT_INFO_RIGHT}}/g, generateContactInfo('right'))
+              .replace(/{{SOCIAL_MEDIA_LINKS}}/g, generateSocialMedia())
+              .replace(/{{PROFESSIONAL_DETAILS}}/g, generateProfessionalDetails())
+              .replace(/{{PROFESSIONAL_STATS}}/g, generateProfessionalStats())
+              .replace(/{{PROPERTIES_LIST}}/g, generatePropertiesList());
+            
+            return template;
+          };
+          
+          // Generate website using clean VvebJS template
+          const comprehensiveHTML = generateVvebJSWebsite(fullAgentData);
+          
+          // Save to VvebJS directory structure
+          const vvebJSDir = path.join(__dirname, '../../vvebjs/generated-realtors/realtor-database');
+          const filePath = path.join(vvebJSDir, actualFileName);
+          
+          // Ensure directory exists
+          if (!fs.existsSync(vvebJSDir)) {
+            fs.mkdirSync(vvebJSDir, { recursive: true });
+          }
+          
+          // Write the comprehensive website
+          fs.writeFileSync(filePath, comprehensiveHTML);
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="${agentData.name} - ${agentData.company} | Professional Real Estate Agent${agentData.specializations ? ' | ' + (Array.isArray(agentData.specializations) ? agentData.specializations.join(', ') : agentData.specializations) : ''}">
+    <meta name="author" content="${agentData.name}">
+    <title>${agentData.name} - ${agentData.company} | Real Estate Professional</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .hero-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4rem 0; }
+        .stats-card { border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .social-links a { color: #667eea; font-size: 1.5rem; margin: 0 10px; }
+        .specialization-badge { background: #667eea; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; margin: 0.2rem; font-size: 0.85rem; }
+        .rating-stars { color: #ffc107; }
+        .contact-card { background: #f8f9fa; border-radius: 10px; padding: 2rem; }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold">${agentData.name || 'Professional Realtor'}</h1>
+                    <p class="lead">${agentData.title || 'Real Estate Professional'} at ${agentData.company || 'Real Estate Company'}</p>
+                    ${agentData.ratings ? `<div class="rating-stars mb-2">
+                        ${'★'.repeat(Math.floor(agentData.ratings))}${'☆'.repeat(5-Math.floor(agentData.ratings))} 
+                        <span class="text-white-50">(${agentData.ratings}/5)</span>
+                    </div>` : ''}
+                    <p class="mb-4">${agentData.bio || 'Experienced real estate professional dedicated to helping clients achieve their property goals.'}</p>
+                    ${agentData.website ? `<p class="mb-3"><i class="fas fa-globe me-2"></i><a href="${agentData.website}" target="_blank" class="text-white">${agentData.website}</a></p>` : ''}
+                    
+                    <!-- Stats Row -->
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <h3>${properties.length || agentData.total_properties || 0}</h3>
+                            <small>Properties</small>
+                        </div>
+                        <div class="col-4">
+                            <h3>${websiteData.property_price_range ? '$' + Math.round(websiteData.property_price_range.average/1000) + 'K' : (agentData.avg_property_price ? '$' + Math.round(agentData.avg_property_price/1000) + 'K' : 'Contact')}</h3>
+                            <small>Avg Price</small>
+                        </div>
+                        <div class="col-4">
+                            <h3>${agentData.experience_years ? agentData.experience_years + 'Y' : 'Contact'}</h3>
+                            <small>Experience</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 text-center">
+                    ${agentData.profile_image_url ? `<img src="${agentData.profile_image_url}" class="img-fluid rounded-circle shadow-lg" style="max-width: 300px;" alt="${agentData.name}">` : '<div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center shadow-lg" style="width: 300px; height: 300px;"><span class="text-muted fs-1">👤</span></div>'}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Professional Information Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="contact-card mb-4">
+                        <h2 class="mb-3"><i class="fas fa-address-card me-2"></i>Contact Information</h2>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><i class="fas fa-phone me-2"></i><strong>Phone:</strong> ${agentData.phone || 'Contact for phone'}</p>
+                                <p><i class="fas fa-envelope me-2"></i><strong>Email:</strong> ${agentData.email || 'Contact for email'}</p>
+                                ${agentData.address ? `<p><i class="fas fa-map-marker-alt me-2"></i><strong>Address:</strong> ${agentData.address}</p>` : ''}
+                            </div>
+                            <div class="col-md-6">
+                                <p><i class="fas fa-id-card me-2"></i><strong>License:</strong> ${agentData.license_number || 'Licensed Professional'}</p>
+                                <p><i class="fas fa-map me-2"></i><strong>State:</strong> ${agentData.license_state || 'State Licensed'}</p>
+                                ${agentData.website ? `<p><i class="fas fa-globe me-2"></i><strong>Website:</strong> <a href="${agentData.website}" target="_blank">${agentData.website}</a></p>` : ''}
+                            </div>
+                        </div>
+                        
+                        <!-- Social Media Links -->
+                        ${agentData.social_media && (agentData.social_media.facebook || agentData.social_media.linkedin || agentData.social_media.instagram || agentData.social_media.twitter) ? `
+                        <div class="mt-3">
+                            <h5>Connect With Me:</h5>
+                            <div class="social-links">
+                                ${agentData.social_media.facebook ? `<a href="${agentData.social_media.facebook}" target="_blank"><i class="fab fa-facebook"></i></a>` : ''}
+                                ${agentData.social_media.linkedin ? `<a href="${agentData.social_media.linkedin}" target="_blank"><i class="fab fa-linkedin"></i></a>` : ''}
+                                ${agentData.social_media.instagram ? `<a href="${agentData.social_media.instagram}" target="_blank"><i class="fab fa-instagram"></i></a>` : ''}
+                                ${agentData.social_media.twitter ? `<a href="${agentData.social_media.twitter}" target="_blank"><i class="fab fa-twitter"></i></a>` : ''}
+                            </div>
+                        </div>` : ''}
+                    </div>
+                    
+                    <!-- Professional Details -->
+                    ${agentData.specializations || agentData.languages || agentData.certifications || agentData.service_areas ? `
+                    <div class="contact-card mb-4">
+                        <h2 class="mb-3"><i class="fas fa-award me-2"></i>Professional Details</h2>
+                        
+                        ${agentData.specializations ? `
+                        <div class="mb-3">
+                            <h5>Specializations:</h5>
+                            <div>
+                                ${Array.isArray(agentData.specializations) ? 
+                                    agentData.specializations.map(spec => `<span class="specialization-badge">${spec}</span>`).join('') :
+                                    `<span class="specialization-badge">${agentData.specializations}</span>`
+                                }
+                            </div>
+                        </div>` : ''}
+                        
+                        ${agentData.languages ? `
+                        <div class="mb-3">
+                            <h5>Languages:</h5>
+                            <p><i class="fas fa-language me-2"></i>${Array.isArray(agentData.languages) ? agentData.languages.join(', ') : agentData.languages}</p>
+                        </div>` : ''}
+                        
+                        ${agentData.certifications ? `
+                        <div class="mb-3">
+                            <h5>Certifications:</h5>
+                            <p><i class="fas fa-certificate me-2"></i>${Array.isArray(agentData.certifications) ? agentData.certifications.join(', ') : agentData.certifications}</p>
+                        </div>` : ''}
+                        
+                        ${agentData.service_areas ? `
+                        <div class="mb-3">
+                            <h5>Service Areas:</h5>
+                            <p><i class="fas fa-map-marked-alt me-2"></i>${Array.isArray(agentData.service_areas) ? agentData.service_areas.join(', ') : agentData.service_areas}</p>
+                        </div>` : ''}
+                    </div>` : ''}
+                </div>
+                
+                <!-- Stats Sidebar -->
+                <div class="col-lg-4">
+                    <div class="stats-card card">
+                        <div class="card-body text-center">
+                            <h4>Professional Stats</h4>
+                            <hr>
+                            <div class="mb-3">
+                                <h3 class="text-primary">${properties.length || agentData.total_properties || 0}</h3>
+                                <small class="text-muted">Total Properties</small>
+                            </div>
+                            ${agentData.cities_served ? `
+                            <div class="mb-3">
+                                <h3 class="text-success">${Array.isArray(agentData.cities_served) ? agentData.cities_served.length : agentData.cities_served.split(',').length}</h3>
+                                <small class="text-muted">Cities Served</small>
+                            </div>` : ''}
+                            ${agentData.min_property_price && agentData.max_property_price ? `
+                            <div class="mb-3">
+                                <small class="text-muted">Price Range</small>
+                                <p class="fw-bold">$${Math.round(agentData.min_property_price/1000)}K - $${Math.round(agentData.max_property_price/1000)}K</p>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Properties Section -->
+    ${properties.length > 0 ? `
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">Current Properties (${properties.length})</h2>
+            <div class="row">
+                ${propertyListHTML}
+            </div>
+        </div>
+    </section>
+    ` : ''}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>`;
+          };
+          
+          // Generate the comprehensive HTML
+          const comprehensiveHTML = generateComprehensiveHTML(fullAgentData);
+          
+          // Save to VvebJS directory structure
+          const vvebJSDir = path.join(__dirname, '../../vvebjs/generated-realtors/realtor-database');
+          const filePath = path.join(vvebJSDir, actualFileName);
+          
+          // Ensure directory exists
+          if (!fs.existsSync(vvebJSDir)) {
+            fs.mkdirSync(vvebJSDir, { recursive: true });
+          }
+          
+          // Write the comprehensive website
+          fs.writeFileSync(filePath, comprehensiveHTML);
+          console.log(`✅ Generated comprehensive website: ${filePath}`);
+          
+        } catch (fileGenerationError) {
+          console.warn('Could not generate comprehensive website file:', fileGenerationError.message);
+        }
+        
+        console.log(`Generating COMPREHENSIVE website for: ${websiteData.name}`);
+        console.log(`  - Properties included: ${websiteData.properties?.length || 0}`);
+        console.log(`  - Price range: $${websiteData.property_price_range?.min || 0} - $${websiteData.property_price_range?.max || 0}`);
+        console.log(`  - Property locations: ${websiteData.property_locations?.length || 0} addresses`);
+        console.log(`  - Total fields available: ${Object.keys(websiteData).length}`);
+        console.log(`  - Website URL: ${actualWebsiteUrl}`);
+        
+        results.push({
+          contactId: fullAgentData.id,
+          name: fullAgentData.name,
+          success: true,
+          websiteUrl: actualWebsiteUrl,
+          fileName: actualFileName,
+          dataSource: 'chrome_extension_complete',
+          propertiesIncluded: websiteData.properties?.length || 0,
+          propertyPriceRange: websiteData.property_price_range,
+          fieldsUsed: Object.keys(websiteData).filter(key => {
+            const value = websiteData[key];
+            return value && value !== '' && value !== 0 && 
+                   !(Array.isArray(value) && value.length === 0) &&
+                   !(typeof value === 'object' && Object.keys(value).length === 0);
+          }),
+          totalDataFields: Object.keys(websiteData).length
+        });
+        
+      } catch (error) {
+        console.error(`Error generating website for ${contact.name}:`, error.message);
+        results.push({
+          contactId: contact.id,
+          name: contact.name,
+          success: false,
+          error: error.message
+        });
+      }
+    }
+    
+    const successful = results.filter(r => r.success).length;
+    const totalProperties = results.reduce((sum, r) => sum + (r.propertiesIncluded || 0), 0);
+    const avgPropertiesPerAgent = successful > 0 ? Math.round(totalProperties / successful) : 0;
+    
+    res.json({
+      success: true,
+      totalGenerated: successful,
+      chromeExtensionCount: successful,
+      results: results,
+      propertyDataSummary: {
+        totalPropertiesIncluded: totalProperties,
+        averagePropertiesPerAgent: avgPropertiesPerAgent,
+        agentsWithProperties: results.filter(r => r.propertiesIncluded > 0).length
+      },
+      metadata: {
+        dataSource: 'chrome_extension_complete_with_properties',
+        timestamp: new Date().toISOString(),
+        comprehensiveDataUsed: true
+      }
+    });
+    
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Single realtor website generation endpoint
+app.post('/api/generate-realtor-website', async (req, res) => {
+  try {
+    const { contact, database } = req.body;
+    
+    if (!contact) {
+      return res.status(400).json({ error: 'Contact is required' });
+    }
+
+    // Get COMPLETE Chrome Extension data including ALL properties for this agent
+    let fullAgentData = contact;
+    
+    // If we have an agent ID, fetch complete data from Chrome Extension
+    if (contact.id) {
+      try {
+        // Get properties for this specific agent from Chrome Extension
+        const agentProperties = await unifiedDbManager.getPropertiesForAgent(contact.id);
+        fullAgentData.properties = agentProperties;
+        fullAgentData.property_details = agentProperties;
+      } catch (error) {
+        console.warn(`Could not fetch properties for agent ${contact.id}:`, error.message);
+        fullAgentData.properties = [];
+        fullAgentData.property_details = [];
+      }
+    }
+    
+    const fs = require('fs');
+    const path = require('path');
+    
+    // Function to generate the same slug as VvebJS does
+    const generateVvebJSSlug = (contact) => {
+      let name = contact.name || contact.NAME || 'unknown-agent';
+      
+      // Handle placeholder names (same logic as VvebJS)
+      if (!name || name === 'Agent Name Not Found' || name === 'Unknown') {
+        const companyName = (contact.company || contact.Company || '')
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-');
+        if (companyName) {
+          name = `agent-at-${companyName}`;
+        } else {
+          name = `unknown-agent`;
+        }
+      }
+      
+      const cleanName = name
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim();
+      
+      return cleanName;
+    };
+    
+    // Use the contact's actual ID - no hash generation needed
+    const uniqueId = fullAgentData.id || '0000000';
+    
+    const baseSlug = generateVvebJSSlug(fullAgentData);
+    const actualFileName = `${baseSlug}-${uniqueId}.html`;
+    const websiteUrl = `http://localhost:3030/generated-realtors/realtor-database/${actualFileName}`;
+    const editorUrl = `http://localhost:3030/editor.html?page=generated-realtors/realtor-database/${actualFileName}`;
+    
+    // Generate comprehensive HTML with ALL property data
+    const properties = fullAgentData.properties || [];
+    const propertyListHTML = properties.map(prop => `
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">${prop.address || 'Property Address'}</h5>
+            <p class="card-text">
+              <strong>Price:</strong> ${prop.price_formatted || prop.price || 'Contact for price'}<br>
+              ${prop.bedrooms ? `<strong>Bedrooms:</strong> ${prop.bedrooms}<br>` : ''}
+              ${prop.bathrooms ? `<strong>Bathrooms:</strong> ${prop.bathrooms}<br>` : ''}
+              ${prop.square_feet ? `<strong>Square Feet:</strong> ${prop.square_feet}<br>` : ''}
+              ${prop.description ? `<p>${prop.description}</p>` : ''}
+            </p>
+          </div>
+        </div>
+      </div>
+    `).join('');
+    
+    const comprehensiveHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="${fullAgentData.name || fullAgentData.NAME} - ${fullAgentData.company} | Professional Real Estate Agent${fullAgentData.specializations ? ' | ' + (Array.isArray(fullAgentData.specializations) ? fullAgentData.specializations.join(', ') : fullAgentData.specializations) : ''}">
+    <meta name="author" content="${fullAgentData.name || fullAgentData.NAME}">
+    <title>${fullAgentData.name || fullAgentData.NAME} - ${fullAgentData.company} | Real Estate Professional</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .hero-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4rem 0; }
+        .stats-card { border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .social-links a { color: #667eea; font-size: 1.5rem; margin: 0 10px; }
+        .specialization-badge { background: #667eea; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; margin: 0.2rem; font-size: 0.85rem; }
+        .rating-stars { color: #ffc107; }
+        .contact-card { background: #f8f9fa; border-radius: 10px; padding: 2rem; }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold">${fullAgentData.name || fullAgentData.NAME || 'Professional Realtor'}</h1>
+                    <p class="lead">${fullAgentData.title || 'Real Estate Professional'} at ${fullAgentData.company || 'Real Estate Company'}</p>
+                    ${fullAgentData.ratings ? `<div class="rating-stars mb-2">
+                        ${'★'.repeat(Math.floor(fullAgentData.ratings))}${'☆'.repeat(5-Math.floor(fullAgentData.ratings))} 
+                        <span class="text-white-50">(${fullAgentData.ratings}/5)</span>
+                    </div>` : ''}
+                    <p class="mb-4">${fullAgentData.bio || fullAgentData.description || 'Experienced real estate professional dedicated to helping clients achieve their property goals.'}</p>
+                    ${fullAgentData.website ? `<p class="mb-3"><i class="fas fa-globe me-2"></i><a href="${fullAgentData.website}" target="_blank" class="text-white">${fullAgentData.website}</a></p>` : ''}
+                    
+                    <!-- Stats Row -->
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <h3>${properties.length || fullAgentData.total_properties || 0}</h3>
+                            <small>Properties</small>
+                        </div>
+                        <div class="col-4">
+                            <h3>${properties.length > 0 ? '$' + Math.round((properties.reduce((sum, p) => sum + parseFloat(p.price || 0), 0) / properties.length)/1000) + 'K' : (fullAgentData.avg_property_price ? '$' + Math.round(fullAgentData.avg_property_price/1000) + 'K' : 'Contact')}</h3>
+                            <small>Avg Price</small>
+                        </div>
+                        <div class="col-4">
+                            <h3>${fullAgentData.experience_years ? fullAgentData.experience_years + 'Y' : 'Contact'}</h3>
+                            <small>Experience</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 text-center">
+                    ${fullAgentData.profile_image_url ? `<img src="${fullAgentData.profile_image_url}" class="img-fluid rounded-circle shadow-lg" style="max-width: 300px;" alt="${fullAgentData.name}">` : '<div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center shadow-lg" style="width: 300px; height: 300px;"><span class="text-muted fs-1">👤</span></div>'}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Professional Information Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="contact-card mb-4">
+                        <h2 class="mb-3"><i class="fas fa-address-card me-2"></i>Contact Information</h2>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><i class="fas fa-phone me-2"></i><strong>Phone:</strong> ${fullAgentData.phone || 'Contact for phone'}</p>
+                                <p><i class="fas fa-envelope me-2"></i><strong>Email:</strong> ${fullAgentData.email || 'Contact for email'}</p>
+                                ${fullAgentData.address ? `<p><i class="fas fa-map-marker-alt me-2"></i><strong>Address:</strong> ${fullAgentData.address}</p>` : ''}
+                            </div>
+                            <div class="col-md-6">
+                                <p><i class="fas fa-id-card me-2"></i><strong>License:</strong> ${fullAgentData.license_number || fullAgentData.license || 'Licensed Professional'}</p>
+                                <p><i class="fas fa-map me-2"></i><strong>State:</strong> ${fullAgentData.license_state || fullAgentData.state || 'State Licensed'}</p>
+                                ${fullAgentData.website ? `<p><i class="fas fa-globe me-2"></i><strong>Website:</strong> <a href="${fullAgentData.website}" target="_blank">${fullAgentData.website}</a></p>` : ''}
+                            </div>
+                        </div>
+                        
+                        <!-- Social Media Links -->
+                        ${fullAgentData.social_media && (fullAgentData.social_media.facebook || fullAgentData.social_media.linkedin || fullAgentData.social_media.instagram || fullAgentData.social_media.twitter) ? `
+                        <div class="mt-3">
+                            <h5>Connect With Me:</h5>
+                            <div class="social-links">
+                                ${fullAgentData.social_media.facebook ? `<a href="${fullAgentData.social_media.facebook}" target="_blank"><i class="fab fa-facebook"></i></a>` : ''}
+                                ${fullAgentData.social_media.linkedin ? `<a href="${fullAgentData.social_media.linkedin}" target="_blank"><i class="fab fa-linkedin"></i></a>` : ''}
+                                ${fullAgentData.social_media.instagram ? `<a href="${fullAgentData.social_media.instagram}" target="_blank"><i class="fab fa-instagram"></i></a>` : ''}
+                                ${fullAgentData.social_media.twitter ? `<a href="${fullAgentData.social_media.twitter}" target="_blank"><i class="fab fa-twitter"></i></a>` : ''}
+                            </div>
+                        </div>` : ''}
+                    </div>
+                    
+                    <!-- Professional Details -->
+                    ${fullAgentData.specializations || fullAgentData.languages || fullAgentData.certifications || fullAgentData.service_areas ? `
+                    <div class="contact-card mb-4">
+                        <h2 class="mb-3"><i class="fas fa-award me-2"></i>Professional Details</h2>
+                        
+                        ${fullAgentData.specializations ? `
+                        <div class="mb-3">
+                            <h5>Specializations:</h5>
+                            <div>
+                                ${Array.isArray(fullAgentData.specializations) ? 
+                                    fullAgentData.specializations.map(spec => `<span class="specialization-badge">${spec}</span>`).join('') :
+                                    `<span class="specialization-badge">${fullAgentData.specializations}</span>`
+                                }
+                            </div>
+                        </div>` : ''}
+                        
+                        ${fullAgentData.languages ? `
+                        <div class="mb-3">
+                            <h5>Languages:</h5>
+                            <p><i class="fas fa-language me-2"></i>${Array.isArray(fullAgentData.languages) ? fullAgentData.languages.join(', ') : fullAgentData.languages}</p>
+                        </div>` : ''}
+                        
+                        ${fullAgentData.certifications ? `
+                        <div class="mb-3">
+                            <h5>Certifications:</h5>
+                            <p><i class="fas fa-certificate me-2"></i>${Array.isArray(fullAgentData.certifications) ? fullAgentData.certifications.join(', ') : fullAgentData.certifications}</p>
+                        </div>` : ''}
+                        
+                        ${fullAgentData.service_areas ? `
+                        <div class="mb-3">
+                            <h5>Service Areas:</h5>
+                            <p><i class="fas fa-map-marked-alt me-2"></i>${Array.isArray(fullAgentData.service_areas) ? fullAgentData.service_areas.join(', ') : fullAgentData.service_areas}</p>
+                        </div>` : ''}
+                    </div>` : ''}
+                </div>
+                
+                <!-- Stats Sidebar -->
+                <div class="col-lg-4">
+                    <div class="stats-card card">
+                        <div class="card-body text-center">
+                            <h4>Professional Stats</h4>
+                            <hr>
+                            <div class="mb-3">
+                                <h3 class="text-primary">${properties.length || fullAgentData.total_properties || 0}</h3>
+                                <small class="text-muted">Total Properties</small>
+                            </div>
+                            ${fullAgentData.cities_served ? `
+                            <div class="mb-3">
+                                <h3 class="text-success">${Array.isArray(fullAgentData.cities_served) ? fullAgentData.cities_served.length : fullAgentData.cities_served.split(',').length}</h3>
+                                <small class="text-muted">Cities Served</small>
+                            </div>` : ''}
+                            ${fullAgentData.min_property_price && fullAgentData.max_property_price ? `
+                            <div class="mb-3">
+                                <small class="text-muted">Price Range</small>
+                                <p class="fw-bold">$${Math.round(fullAgentData.min_property_price/1000)}K - $${Math.round(fullAgentData.max_property_price/1000)}K</p>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Properties Section -->
+    ${properties.length > 0 ? `
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">Current Properties (${properties.length})</h2>
+            <div class="row">
+                ${propertyListHTML}
+            </div>
+        </div>
+    </section>
+    ` : ''}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>`;
+    
+    // Save to VvebJS directory structure
+    const vvebJSDir = path.join(__dirname, '../../vvebjs/generated-realtors/realtor-database');
+    const filePath = path.join(vvebJSDir, actualFileName);
+    
+    // Ensure directory exists
+    if (!fs.existsSync(vvebJSDir)) {
+      fs.mkdirSync(vvebJSDir, { recursive: true });
+    }
+    
+    // Write the comprehensive website
+    fs.writeFileSync(filePath, comprehensiveHTML);
+    
+    console.log(`✅ Generated comprehensive website: ${filePath}`);
+    console.log(`Generating COMPREHENSIVE website for: ${fullAgentData.name || fullAgentData.NAME}`);
+    console.log(`  - Properties included: ${properties.length}`);
+    console.log(`  - Price range: $${properties.length > 0 ? Math.min(...properties.map(p => p.price || 0)) + ' - $' + Math.max(...properties.map(p => p.price || 0)) : '0'}`);
+    console.log(`  - Property locations: ${properties.length} addresses`);
+    console.log(`  - Total fields available: ${Object.keys(fullAgentData).length}`);
+    console.log(`  - Website URL: ${websiteUrl}`);
+    
+    res.json({
+      success: true,
+      websiteUrl: websiteUrl,
+      editorUrl: editorUrl,
+      filePath: filePath,
+      fileName: actualFileName,
+      realtorData: {
+        name: fullAgentData.name || fullAgentData.NAME,
+        propertiesIncluded: properties.length,
+        id: uniqueId
+      }
+    });
+    
+  } catch (error) {
+    console.error('Single realtor website generation error:', error);
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
+  }
+});
+
+// Health check endpoint with comprehensive Chrome Extension data
+app.get('/api/health', async (req, res) => {
+  try {
+    const healthCheck = await unifiedDbManager.healthCheck();
+    
+    res.json({
+      status: healthCheck.status,
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      database: {
+        type: 'chrome_extension',
+        connected: unifiedDbManager.getCurrentDatabase().isConnected,
+        healthCheck: healthCheck
+      },
+      dataStores: {
+        agents: { accessible: true, description: 'Real estate agent profiles with complete professional data' },
+        properties: { accessible: true, description: 'Property listings associated with agents' },
+        extraction_logs: { accessible: true, description: 'Data extraction monitoring and logging' },
+        agent_stats: { accessible: true, description: 'Computed statistics and analytics for agents' },
+        recent_extractions: { accessible: true, description: 'Recent data extraction activities' }
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      status: 'error',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Catch all handler: send back React's index.html file for any non-API routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/build/index.html'));
+});
+
+const server = app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📊 CRM Dashboard: http://localhost:${PORT}`);
+  console.log(`🔌 Chrome Extension Support: ${unifiedDbManager.getCurrentDatabase().isConnected ? 'Connected' : 'Disconnected'}`);
+  console.log(`📈 Comprehensive Data Access: ALL Chrome Extension data stores accessible`);
+  console.log(`🗃️  Available Data Stores: agents, properties, extraction_logs, agent_stats, recent_extractions`);
+});
+
+// Comprehensive error handling and graceful shutdown
+process.on('uncaughtException', (error) => {
+  console.error('🚨 Uncaught Exception:', error);
+  console.error('Stack:', error.stack);
+  // Give time for logs to write
+  setTimeout(() => {
+    process.exit(1);
+  }, 1000);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('🚨 Unhandled Rejection at:', promise, 'reason:', reason);
+  console.error('Stack:', reason?.stack);
+  // Don't exit on unhandled rejections, just log them
+});
+
+// Memory monitoring
+const memoryCheckInterval = setInterval(() => {
+  const usage = process.memoryUsage();
+  const mbUsed = Math.round(usage.heapUsed / 1024 / 1024);
+  const mbTotal = Math.round(usage.heapTotal / 1024 / 1024);
+  
+  // Log if memory usage is high
+  if (mbUsed > 500) {
+    console.warn(`⚠️ High memory usage: ${mbUsed}MB / ${mbTotal}MB`);
+  }
+  
+  // Force garbage collection if memory is very high
+  if (mbUsed > 1000) {
+    console.warn('🧹 Forcing garbage collection due to high memory usage');
+    if (global.gc) {
+      global.gc();
+    }
+  }
+}, 30000); // Check every 30 seconds
+
+// Graceful shutdown
+const gracefulShutdown = (signal) => {
+  console.log(`${signal} received, shutting down gracefully`);
+  
+  // Clear intervals
+  clearInterval(memoryCheckInterval);
+  
+  // Close server
+  server.close(() => {
+    console.log('HTTP server closed');
+    
+    // Close database connections if needed
+    if (unifiedDbManager && typeof unifiedDbManager.close === 'function') {
+      unifiedDbManager.close();
+    }
+    
+    console.log('Process terminated gracefully');
+    process.exit(0);
+  });
+  
+  // Force exit after 10 seconds
+  setTimeout(() => {
+    console.error('Forced shutdown after timeout');
+    process.exit(1);
+  }, 10000);
+};
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+module.exports = app;

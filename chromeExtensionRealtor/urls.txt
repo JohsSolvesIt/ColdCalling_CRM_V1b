@@ -1,0 +1,13 @@
+# Sample Realtor.com URLs for batch processing
+# Lines starting with # are comments and will be ignored
+# Add your URLs one per line
+
+https://www.realtor.com/realestateandhomes-search/New-York_NY
+https://www.realtor.com/realestateandhomes-search/Los-Angeles_CA
+https://www.realtor.com/realestateandhomes-search/Miami_FL
+https://www.realtor.com/realestateandhomes-search/Chicago_IL
+https://www.realtor.com/realestateandhomes-search/Boston_MA
+
+# Add your 120+ URLs here, one per line
+# The batch processor will go through them one by one
+# You can also use CSV files with URLs

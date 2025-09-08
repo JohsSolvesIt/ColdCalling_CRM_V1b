@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=CSV Cleaner
+Comment=Convert realtor CSV files to standardized CRM format
+Exec=/home/realm/Documents/ColdCalling CRM/CSV cleaner/minimal_launcher.sh
+Icon=application-x-csv
+Terminal=false
+Categories=Office;Utility;
+StartupNotify=false

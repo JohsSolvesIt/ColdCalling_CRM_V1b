@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "Realtor Data Extractor",
+  "version": "1.0",
+  "description": "Extract agent and property data from Realtor.com",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting",
+    "clipboardWrite"
+  ],
+  "host_permissions": [
+    "*://*.realtor.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.realtor.com/*",
+        "*://realtor.com/*", 
+        "*://www.realtor.com/*"
+      ],
+      "js": [
+        "modules/core/logging-utils.js",
+        "modules/core/polling-manager.js",
+        "modules/extractors/contact-extractor.js",
+        "modules/extractors/reviews-extractor.js",
+        "modules/extractors/listings-extractor.js",
+        "modules/extractors/bio-extractor.js",
+        "modules/extractors/photo-extractor.js",
+        "modules/extractors/agent-extractor.js",
+        "database-service.js",
+        "client-data-transformer.js",
+        "popup-section-generator.js",
+        "popup-html-generator.js",
+        "popup-modal-fallback.js",
+        "popup-system.js",
+        "content.js"
+      ],
+      "run_at": "document_end",
+      "all_frames": false
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Extract Realtor Data"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

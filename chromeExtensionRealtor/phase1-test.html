@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 1 Module Test</title>
+</head>
+<body>
+    <h1>Chrome Extension Phase 1 Module Test</h1>
+    <div id="test-results"></div>
+    <div id="test-logs"></div>
+
+    <!-- Load modules in correct order -->
+    <script src="modules/core/logging-utils.js"></script>
+    <script src="modules/core/polling-manager.js"></script>
+    <script src="modules/core/database-service.js"></script>
+    
+    <!-- Test script -->
+    <script>
+        // Test results container
+        const resultsDiv = document.getElementById('test-results');
+        const logsDiv = document.getElementById('test-logs');
+        
+        // Capture console logs
+        const originalLog = console.log;
+        const originalWarn = console.warn;
+        const originalError = console.error;
+        
+        function addLogToPage(type, ...args) {
+            const logEntry = document.createElement('div');
+            logEntry.style.fontFamily = 'monospace';
+            logEntry.style.fontSize = '12px';
+            logEntry.style.margin = '2px 0';
+            logEntry.style.color = type === 'error' ? 'red' : type === 'warn' ? 'orange' : 'black';
+            logEntry.textContent = `[${type.toUpperCase()}] ${args.join(' ')}`;
+            logsDiv.appendChild(logEntry);
+        }
+        
+        console.log = (...args) => {
+            originalLog(...args);
+            addLogToPage('log', ...args);
+        };
+        
+        console.warn = (...args) => {
+            originalWarn(...args);
+            addLogToPage('warn', ...args);
+        };
+        
+        console.error = (...args) => {
+            originalError(...args);
+            addLogToPage('error', ...args);
+        };
+
+        // Test function
+        function runTests() {
+            const tests = [];
+            
+            // Test 1: Logging utilities
+            console.log('🧪 Testing logging utilities...');
+            try {
+                if (typeof window.LOG_LEVELS_V2 !== 'undefined' && typeof window.log !== 'undefined') {
+                    tests.push({ name: 'Logging Utils', status: '✅ PASS', details: 'LOG_LEVELS_V2 and log object available' });
+                    
+                    // Test log levels
+                    window.log.info('Test info message');
+                    window.log.debug('Test debug message');
+                    window.log.warn('Test warning message');
+                    window.log.recommendation('Test recommendation message');
+                    
+                } else {
+                    tests.push({ name: 'Logging Utils', status: '❌ FAIL', details: 'LOG_LEVELS_V2 or log object not available' });
+                }
+            } catch (error) {
+                tests.push({ name: 'Logging Utils', status: '❌ ERROR', details: error.message });
+            }
+            
+            // Test 2: ContentPollingManager
+            console.log('🧪 Testing ContentPollingManager...');
+            try {
+                if (typeof window.ContentPollingManager !== 'undefined') {
+                    tests.push({ name: 'ContentPollingManager', status: '✅ PASS', details: 'ContentPollingManager class available' });
+                    
+                    // Test a simple poll
+                    window.ContentPollingManager.pollForElement('body', { maxAttempts: 1 }).then(result => {
+                        console.log('Poll test result:', result);
+                    });
+                    
+                } else {
+                    tests.push({ name: 'ContentPollingManager', status: '❌ FAIL', details: 'ContentPollingManager not available' });
+                }
+            } catch (error) {
+                tests.push({ name: 'ContentPollingManager', status: '❌ ERROR', details: error.message });
+            }
+            
+            // Test 3: DatabaseService
+            console.log('🧪 Testing DatabaseService...');
+            try {
+                if (typeof window.DatabaseService !== 'undefined') {
+                    const dbService = new window.DatabaseService();
+                    if (dbService && typeof dbService.checkConnection === 'function') {
+                        tests.push({ name: 'DatabaseService', status: '✅ PASS', details: 'DatabaseService instantiated successfully' });
+                        
+                        // Test cleaning functions
+                        const testString = dbService.cleanString('  test string  ');
+                        const testPhone = dbService.cleanPhone('(555) 123-4567');
+                        const testEmail = dbService.cleanEmail('TEST@EXAMPLE.COM');
+                        
+                        console.log('Clean string test:', testString);
+                        console.log('Clean phone test:', testPhone);
+                        console.log('Clean email test:', testEmail);
+                        
+                    } else {
+                        tests.push({ name: 'DatabaseService', status: '❌ FAIL', details: 'DatabaseService methods not available' });
+                    }
+                } else {
+                    tests.push({ name: 'DatabaseService', status: '❌ FAIL', details: 'DatabaseService not available' });
+                }
+            } catch (error) {
+                tests.push({ name: 'DatabaseService', status: '❌ ERROR', details: error.message });
+            }
+            
+            // Test 4: Module interconnection
+            console.log('🧪 Testing module interconnection...');
+            try {
+                // Test if modules can use each other
+                if (window.log && window.ContentPollingManager && window.DatabaseService) {
+                    window.log.info('All modules loaded successfully');
+                    tests.push({ name: 'Module Integration', status: '✅ PASS', details: 'All modules working together' });
+                } else {
+                    tests.push({ name: 'Module Integration', status: '❌ FAIL', details: 'Not all modules available' });
+                }
+            } catch (error) {
+                tests.push({ name: 'Module Integration', status: '❌ ERROR', details: error.message });
+            }
+            
+            // Display results
+            tests.forEach(test => {
+                const testDiv = document.createElement('div');
+                testDiv.style.padding = '10px';
+                testDiv.style.margin = '5px 0';
+                testDiv.style.border = '1px solid #ccc';
+                testDiv.style.borderRadius = '4px';
+                testDiv.innerHTML = `
+                    <strong>${test.name}:</strong> ${test.status}<br>
+                    <small>${test.details}</small>
+                `;
+                resultsDiv.appendChild(testDiv);
+            });
+            
+            // Summary
+            const passCount = tests.filter(t => t.status.includes('PASS')).length;
+            const totalCount = tests.length;
+            
+            const summaryDiv = document.createElement('div');
+            summaryDiv.style.padding = '15px';
+            summaryDiv.style.margin = '10px 0';
+            summaryDiv.style.backgroundColor = passCount === totalCount ? '#d4edda' : '#f8d7da';
+            summaryDiv.style.border = `1px solid ${passCount === totalCount ? '#c3e6cb' : '#f5c6cb'}`;
+            summaryDiv.style.borderRadius = '4px';
+            summaryDiv.innerHTML = `
+                <h3>Test Summary</h3>
+                <p><strong>${passCount}/${totalCount} tests passed</strong></p>
+                <p>Phase 1 Status: ${passCount === totalCount ? '✅ ALL TESTS PASS' : '❌ SOME TESTS FAILED'}</p>
+            `;
+            resultsDiv.insertBefore(summaryDiv, resultsDiv.firstChild);
+        }
+        
+        // Run tests when page loads
+        window.addEventListener('load', () => {
+            setTimeout(runTests, 100); // Small delay to ensure all modules are loaded
+        });
+    </script>
+</body>
+</html>

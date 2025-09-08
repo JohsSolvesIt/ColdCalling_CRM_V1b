@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="{{REALTOR_NAME}} - {{REALTOR_COMPANY}} | Professional Real Estate Agent">
+    <meta name="author" content="{{REALTOR_NAME}}">
+    <title>{{REALTOR_NAME}} - {{REALTOR_COMPANY}} | Real Estate Professional</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- jQuery for VvebJS -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    
+    <style>
+        html, body { width: 100%; height: 100%; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .hero-section { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; 
+            padding: 4rem 0; 
+        }
+        .stats-card { border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .social-links a { color: #667eea; font-size: 1.5rem; margin: 0 10px; text-decoration: none; }
+        .specialization-badge { 
+            background: #667eea; 
+            color: white; 
+            padding: 0.3rem 0.8rem; 
+            border-radius: 20px; 
+            margin: 0.2rem; 
+            font-size: 0.85rem; 
+            display: inline-block;
+        }
+        .rating-stars { color: #ffc107; }
+        .contact-card { 
+            background: #f8f9fa; 
+            border-radius: 10px; 
+            padding: 2rem; 
+            margin-bottom: 2rem;
+        }
+        .property-card {
+            transition: transform 0.2s;
+        }
+        .property-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero-section" data-vvebjs-element="section">
+        <div class="container" data-vvebjs-element="container">
+            <div class="row align-items-center" data-vvebjs-element="row">
+                <div class="col-lg-6" data-vvebjs-element="column">
+                    <h1 class="display-4 fw-bold" data-vvebjs-element="heading" data-vvebjs-editable="true">{{REALTOR_NAME}}</h1>
+                    <p class="lead" data-vvebjs-element="text" data-vvebjs-editable="true">{{REALTOR_TITLE}} at {{REALTOR_COMPANY}}</p>
+                    
+                    <!-- Ratings -->
+                    <div class="rating-stars mb-2" data-vvebjs-element="ratings">
+                        {{REALTOR_RATINGS}}
+                    </div>
+                    
+                    <!-- Bio -->
+                    <p class="mb-4" data-vvebjs-element="text" data-vvebjs-editable="true">{{REALTOR_BIO}}</p>
+                    
+                    <!-- Website Link -->
+                    <div class="mb-3" data-vvebjs-element="website-link">
+                        {{REALTOR_WEBSITE_LINK}}
+                    </div>
+                    
+                    <!-- Stats Row -->
+                    <div class="row text-center" data-vvebjs-element="stats-row">
+                        <div class="col-4" data-vvebjs-element="stat-item">
+                            <h3 data-vvebjs-editable="true">{{TOTAL_PROPERTIES}}</h3>
+                            <small>Properties</small>
+                        </div>
+                        <div class="col-4" data-vvebjs-element="stat-item">
+                            <h3 data-vvebjs-editable="true">{{AVG_PRICE}}</h3>
+                            <small>Avg Price</small>
+                        </div>
+                        <div class="col-4" data-vvebjs-element="stat-item">
+                            <h3 data-vvebjs-editable="true">{{EXPERIENCE_YEARS}}</h3>
+                            <small>Experience</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6 text-center" data-vvebjs-element="profile-image-column">
+                    <div class="profile-image-container" data-vvebjs-element="image-container">
+                        {{REALTOR_PROFILE_IMAGE}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Professional Information Section -->
+    <section class="py-5" data-vvebjs-element="contact-section">
+        <div class="container" data-vvebjs-element="container">
+            <div class="row" data-vvebjs-element="row">
+                <div class="col-lg-8" data-vvebjs-element="main-content">
+                    
+                    <!-- Contact Information Card -->
+                    <div class="contact-card" data-vvebjs-element="contact-card">
+                        <h2 class="mb-3" data-vvebjs-element="heading" data-vvebjs-editable="true">
+                            <i class="fas fa-address-card me-2"></i>Contact Information
+                        </h2>
+                        <div class="row" data-vvebjs-element="contact-row">
+                            <div class="col-md-6" data-vvebjs-element="contact-left">
+                                {{CONTACT_INFO_LEFT}}
+                            </div>
+                            <div class="col-md-6" data-vvebjs-element="contact-right">
+                                {{CONTACT_INFO_RIGHT}}
+                            </div>
+                        </div>
+                        
+                        <!-- Social Media Links -->
+                        <div class="social-media-section" data-vvebjs-element="social-section">
+                            {{SOCIAL_MEDIA_LINKS}}
+                        </div>
+                    </div>
+                    
+                    <!-- Professional Details Card -->
+                    <div class="professional-details" data-vvebjs-element="professional-section">
+                        {{PROFESSIONAL_DETAILS}}
+                    </div>
+                    
+                </div>
+                
+                <!-- Stats Sidebar -->
+                <div class="col-lg-4" data-vvebjs-element="sidebar">
+                    <div class="stats-card card" data-vvebjs-element="stats-card">
+                        <div class="card-body text-center">
+                            <h4 data-vvebjs-editable="true">Professional Stats</h4>
+                            <hr>
+                            <div class="stats-content" data-vvebjs-element="stats-content">
+                                {{PROFESSIONAL_STATS}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Properties Section -->
+    <section class="py-5 bg-light properties-section" data-vvebjs-element="properties-section">
+        <div class="container" data-vvebjs-element="container">
+            <h2 class="text-center mb-5" data-vvebjs-element="heading" data-vvebjs-editable="true">Listings</h2>
+            <div class="row" data-vvebjs-element="properties-grid">
+                {{PROPERTIES_LIST}}
+            </div>
+        </div>
+    </section>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

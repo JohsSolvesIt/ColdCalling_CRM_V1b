@@ -1,0 +1,10 @@
+{
+  "watch": ["server"],
+  "ignore": [
+    "server/temp-deploy/**",
+    "*.log",
+    "*.tmp"
+  ],
+  "ext": "js,json",
+  "delay": "1000"
+}

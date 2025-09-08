@@ -1,0 +1,23 @@
+[build]
+  publish = "crm-app/client/build"
+  functions = "crm-app/netlify/functions"
+
+# Route API requests to the Express app bundled in the single `api` function
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+  force = true
+
+# Generic passthrough for any direct function calls (optional convenience)
+[[redirects]]
+  from = "/functions/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+  force = true
+
+# SPA fallback for React client
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

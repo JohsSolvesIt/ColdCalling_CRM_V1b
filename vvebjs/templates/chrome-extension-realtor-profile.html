@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{REALTOR_NAME}} - {{REALTOR_COMPANY}} | Real Estate Professional</title>
+    <meta name="description" content="{{REALTOR_NAME}} is an experienced real estate professional at {{REALTOR_COMPANY}}. Contact {{REALTOR_NAME}} at {{REALTOR_PHONE}} for all your real estate needs in {{REALTOR_SERVICE_AREAS}}.">
+    <meta name="keywords" content="{{REALTOR_NAME}}, real estate agent, {{REALTOR_COMPANY}}, property sales, home buying, home selling, {{REALTOR_SPECIALTIES}}">
+    
+    <!-- Bootstrap CDN for styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- VvebJS Editor Integration -->
+    <script>
+        window.vvebJsPageData = {
+            title: "{{REALTOR_NAME}} - Real Estate Professional",
+            type: "realtor-profile",
+            id: "{{REALTOR_ID}}"
+        };
+    </script>
+    
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #f8f9fa;
+            --text-color: #333;
+            --border-radius: 12px;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --shadow: 0 8px 32px rgba(0,0,0,0.1);
+            --gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--accent-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Hero Section with Professional Profile */
+        .hero-section {
+            background: var(--gradient);
+            color: white;
+            padding: 4rem 0 6rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.1;
+        }
+
+        .profile-container {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .profile-image {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            border: 6px solid rgba(255,255,255,0.3);
+            box-shadow: var(--shadow);
+            object-fit: cover;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .profile-subtitle {
+            font-size: 1.6rem;
+            font-weight: 300;
+            opacity: 0.9;
+            margin-bottom: 1rem;
+        }
+
+        .profile-badges {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+        }
+
+        .badge-item {
+            background: rgba(255,255,255,0.15);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .contact-quick-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .quick-action-btn {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .quick-action-btn:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        /* Main Content Container */
+        .main-content {
+            background: white;
+            margin: -3rem 1rem 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Statistics Dashboard */
+        .stats-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 3rem 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        /* Section Styling */
+        .section {
+            padding: 3rem 2rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title i {
+            font-size: 2rem;
+        }
+
+        /* Bio Section */
+        .bio-content {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 2rem;
+        }
+
+        /* Specializations */
+        .specialties-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .specialty-card {
+            background: var(--gradient);
+            color: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .specialty-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .specialty-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Contact Form Section with VvebJS Integration */
+        .contact-form-section {
+            background: var(--gradient);
+            color: white;
+        }
+
+        .contact-form-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Social Media Section */
+        .social-media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .social-card {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .social-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-4px);
+        }
+
+        .social-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        /* Ratings Section */
+        .rating-display {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .rating-stars {
+            font-size: 2rem;
+            color: #ffc107;
+            margin-bottom: 1rem;
+        }
+
+        .rating-count {
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        /* Property Showcase */
+        .property-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .property-stat {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .profile-title {
+                font-size: 2rem;
+            }
+            
+            .profile-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .section {
+                padding: 2rem 1rem;
+            }
+            
+            .main-content {
+                margin: -2rem 0.5rem 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animation Classes */
+        .fade-in {
+            animation: fadeIn 0.8s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-up {
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section with Professional Profile -->
+    <div class="hero-section fade-in">
+        <div class="profile-container">
+            <img src="{{REALTOR_PROFILE_IMAGE}}" alt="{{REALTOR_NAME}}" class="profile-image" onerror="if(this.src !== '../../img/default-avatar.svg'){this.src='../../img/default-avatar.svg';} else {this.style.display='none';}">>
+            
+            <h1 class="profile-title">{{REALTOR_NAME}}</h1>
+            <p class="profile-subtitle">{{REALTOR_TITLE}} at {{REALTOR_COMPANY}}</p>
+            
+            <div class="profile-badges">
+                {{#if REALTOR_LICENSE}}
+                <div class="badge-item">
+                    <i class="fas fa-certificate"></i> Licensed {{REALTOR_LICENSE_STATE}}
+                </div>
+                {{/if}}
+                {{#if REALTOR_EXPERIENCE}}
+                <div class="badge-item">
+                    <i class="fas fa-award"></i> {{REALTOR_EXPERIENCE}} Years Experience
+                </div>
+                {{/if}}
+                {{#if REALTOR_RATING_COUNT}}
+                <div class="badge-item">
+                    <i class="fas fa-star"></i> {{REALTOR_RATING_COUNT}} Reviews
+                </div>
+                {{/if}}
+            </div>
+            
+            <div class="contact-quick-actions">
+                <a href="tel:{{REALTOR_PHONE}}" class="quick-action-btn">
+                    <i class="fas fa-phone"></i> Call Now
+                </a>
+                <a href="mailto:{{REALTOR_EMAIL}}" class="quick-action-btn">
+                    <i class="fas fa-envelope"></i> Email
+                </a>
+                <a href="#contact-form" class="quick-action-btn">
+                    <i class="fas fa-comment"></i> Get In Touch
+                </a>
+                {{#if REALTOR_WEBSITE}}
+                <a href="{{REALTOR_WEBSITE}}" target="_blank" class="quick-action-btn">
+                    <i class="fas fa-globe"></i> Website
+                </a>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content slide-up">
+        
+        <!-- Statistics Dashboard -->
+        <div class="stats-section">
+            <h2 class="section-title">
+                <i class="fas fa-chart-line"></i>
+                Performance Metrics
+            </h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <div class="stat-value">{{REALTOR_TOTAL_PROPERTIES}}</div>
+                    <div class="stat-label">Properties Listed</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stat-value">${{REALTOR_AVG_PRICE}}</div>
+                    <div class="stat-label">Average Price</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="stat-value">{{REALTOR_CITIES_SERVED}}</div>
+                    <div class="stat-label">Cities Served</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-value">{{REALTOR_RATING_COUNT}}</div>
+                    <div class="stat-label">Client Reviews</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- About/Bio Section -->
+        {{#if REALTOR_BIO}}
+        <div class="section">
+            <h2 class="section-title">
+                <i class="fas fa-user"></i>
+                About {{REALTOR_FIRST_NAME}}
+            </h2>
+            <div class="bio-content">
+                {{REALTOR_BIO}}
+            </div>
+        </div>
+        {{/if}}
+
+        <!-- Specializations -->
+        {{#if REALTOR_SPECIALIZATIONS}}
+        <div class="section">
+            <h2 class="section-title">
+                <i class="fas fa-medal"></i>
+                Specializations & Expertise
+            </h2>
+            <div class="specialties-grid">
+                {{#each REALTOR_SPECIALIZATIONS}}
+                <div class="specialty-card">
+                    <div class="specialty-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="specialty-title">{{this}}</div>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+        {{/if}}
+
+        <!-- Property Price Range -->
+        <div class="section">
+            <h2 class="section-title">
+                <i class="fas fa-chart-bar"></i>
+                Property Portfolio
+            </h2>
+            <div class="property-stats">
+                <div class="property-stat">
+                    <div class="stat-icon">
+                        <i class="fas fa-arrow-up text-success"></i>
+                    </div>
+                    <div class="stat-value">${{REALTOR_MAX_PRICE}}</div>
+                    <div class="stat-label">Highest Sale</div>
+                </div>
+                <div class="property-stat">
+                    <div class="stat-icon">
+                        <i class="fas fa-arrow-down text-info"></i>
+                    </div>
+                    <div class="stat-value">${{REALTOR_MIN_PRICE}}</div>
+                    <div class="stat-label">Entry Level</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Languages -->
+        {{#if REALTOR_LANGUAGES}}
+        <div class="section">
+            <h2 class="section-title">
+                <i class="fas fa-language"></i>
+                Languages
+            </h2>
+            <div class="specialties-grid">
+                {{#each REALTOR_LANGUAGES}}
+                <div class="specialty-card">
+                    <div class="specialty-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div class="specialty-title">{{this}}</div>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+        {{/if}}
+
+        <!-- Social Media -->
+        {{#if REALTOR_SOCIAL_MEDIA}}
+        <div class="section">
+            <h2 class="section-title">
+                <i class="fas fa-share-alt"></i>
+                Connect With Me
+            </h2>
+            <div class="social-media-grid">
+                {{#if REALTOR_SOCIAL_MEDIA.facebook}}
+                <a href="{{REALTOR_SOCIAL_MEDIA.facebook}}" target="_blank" class="social-card">
+                    <div class="social-icon">
+                        <i class="fab fa-facebook"></i>
+                    </div>
+                    <div>Follow on Facebook</div>
+                </a>
+                {{/if}}
+                {{#if REALTOR_SOCIAL_MEDIA.instagram}}
+                <a href="{{REALTOR_SOCIAL_MEDIA.instagram}}" target="_blank" class="social-card">
+                    <div class="social-icon">
+                        <i class="fab fa-instagram"></i>
+                    </div>
+                    <div>Follow on Instagram</div>
+                </a>
+                {{/if}}
+                {{#if REALTOR_SOCIAL_MEDIA.linkedin}}
+                <a href="{{REALTOR_SOCIAL_MEDIA.linkedin}}" target="_blank" class="social-card">
+                    <div class="social-icon">
+                        <i class="fab fa-linkedin"></i>
+                    </div>
+                    <div>Connect on LinkedIn</div>
+                </a>
+                {{/if}}
+                {{#if REALTOR_SOCIAL_MEDIA.twitter}}
+                <a href="{{REALTOR_SOCIAL_MEDIA.twitter}}" target="_blank" class="social-card">
+                    <div class="social-icon">
+                        <i class="fab fa-twitter"></i>
+                    </div>
+                    <div>Follow on Twitter</div>
+                </a>
+                {{/if}}
+            </div>
+        </div>
+        {{/if}}
+
+        <!-- VvebJS Contact Form Integration -->
+        <div class="contact-form-section section" id="contact-form">
+            <div class="contact-form-container">
+                <h2 class="section-title text-center">
+                    <i class="fas fa-envelope"></i>
+                    Get In Touch
+                </h2>
+                
+                <!-- VvebJS Contact Form Component -->
+                <div data-v-component-plugin-contact-form-form data-v-storage="database" data-v-name="realtor-contact-{{REALTOR_ID}}">
+                    
+                    <div class="notifications" data-v-notifications>
+                        <div class="alert alert-danger d-flex alert-dismissable" role="alert" data-v-notification-error>
+                            <div class="icon align-middle me-2">
+                                <i class="align-middle la la-2x lh-1 la-exclamation-triangle"></i>
+                            </div>
+                            <div class="flex-grow-1 align-self-center text-small">
+                                <div data-v-notification-text">
+                                    Please check your input and try again.
+                                </div>
+                            </div>
+                            <button type="button" class="btn-close align-middle" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
+                        <div class="alert alert-success d-flex alert-dismissable" role="alert" data-v-notification-success">
+                            <div class="icon align-middle me-2">
+                                <i class="align-middle la la-2x lh-1 la-check-circle"></i>
+                            </div>
+                            <div class="flex-grow-1 align-self-center" data-v-notification-text">
+                                Thank you! {{REALTOR_FIRST_NAME}} will get back to you soon.
+                            </div>
+                            <button type="button" class="btn-close align-middle" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    </div>
+
+                    <form action="" method="post" class="mt-4">
+                        <input type="hidden" name="realtor_id" value="{{REALTOR_ID}}">
+                        <input type="hidden" name="realtor_name" value="{{REALTOR_NAME}}">
+                        <input type="hidden" name="csrf" data-v-csrf>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">First Name</label>
+                                <input type="text" class="form-control form-control-lg" name="firstname" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" class="form-control form-control-lg" name="lastname" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control form-control-lg" name="email" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Phone</label>
+                                <input type="tel" class="form-control form-control-lg" name="phone">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Property Interest</label>
+                            <select class="form-control form-control-lg" name="property_type">
+                                <option value="">Select property type...</option>
+                                <option value="buying">Looking to Buy</option>
+                                <option value="selling">Looking to Sell</option>
+                                <option value="renting">Looking to Rent</option>
+                                <option value="investing">Investment Property</option>
+                                <option value="consultation">General Consultation</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Budget Range</label>
+                            <select class="form-control form-control-lg" name="budget_range">
+                                <option value="">Select budget range...</option>
+                                <option value="under-200k">Under $200,000</option>
+                                <option value="200k-400k">$200,000 - $400,000</option>
+                                <option value="400k-600k">$400,000 - $600,000</option>
+                                <option value="600k-800k">$600,000 - $800,000</option>
+                                <option value="800k-1m">$800,000 - $1,000,000</option>
+                                <option value="over-1m">Over $1,000,000</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Message</label>
+                            <textarea class="form-control form-control-lg" name="message" rows="4" placeholder="Tell {{REALTOR_FIRST_NAME}} about your real estate needs..." required></textarea>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-light btn-lg px-5">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                Send Message to {{REALTOR_FIRST_NAME}}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer with Contact Details -->
+        <div class="section" style="background: #f8f9fa;">
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>Contact Information</h3>
+                    <div class="contact-details">
+                        {{#if REALTOR_PHONE}}
+                        <p><i class="fas fa-phone text-primary me-2"></i> {{REALTOR_PHONE}}</p>
+                        {{/if}}
+                        {{#if REALTOR_EMAIL}}
+                        <p><i class="fas fa-envelope text-primary me-2"></i> {{REALTOR_EMAIL}}</p>
+                        {{/if}}
+                        {{#if REALTOR_ADDRESS}}
+                        <p><i class="fas fa-map-marker-alt text-primary me-2"></i> {{REALTOR_ADDRESS}}</p>
+                        {{/if}}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h3>Professional Details</h3>
+                    {{#if REALTOR_LICENSE}}
+                    <p><i class="fas fa-certificate text-primary me-2"></i> License: {{REALTOR_LICENSE}}</p>
+                    {{/if}}
+                    {{#if REALTOR_COMPANY}}
+                    <p><i class="fas fa-building text-primary me-2"></i> {{REALTOR_COMPANY}}</p>
+                    {{/if}}
+                    <p><i class="fas fa-calendar text-primary me-2"></i> Last Updated: {{CURRENT_DATE}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap and Core Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- VvebJS Editor Integration (only loads when editing) -->
+    <script>
+        // Check if we're in editor mode
+        if (window.location.search.includes('edit=') || window.location.hash.includes('edit')) {
+            const script = document.createElement('script');
+            script.src = '../../libs/builder/builder.js';
+            script.onload = function() {
+                // Initialize VvebJS if available
+                if (typeof Vveb !== 'undefined') {
+                    console.log('VvebJS loaded for editing');
+                }
+            };
+            document.head.appendChild(script);
+        }
+    </script>
+    
+    <!-- Smooth scrolling for anchor links -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+            
+            // Add animation classes on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('fade-in');
+                    }
+                });
+            }, observerOptions);
+            
+            document.querySelectorAll('.section').forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+import { useState, useCallback } from 'react';
+
+/**
+ * Custom hook for website management functionality
+ */
+export const useWebsite = () => {
+  const [websiteLoading, setWebsiteLoading] = useState(false);
+
+  // VvebJS configuration
+  const VVEBJS_CONFIG = {
+    serverUrl: 'http://localhost:3030',
+    editorUrl: 'http://localhost:3030/editor.html',
+    generatedPagesPath: '/generated-realtors'
+  };
+
+  /**
+   * Generate a URL-safe slug for a realtor
+   */
+  const generateRealtorSlug = useCallback((name, database) => {
+    if (!name || !database) return null;
+    
+    const cleanName = (name || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .trim();
+    
+    const dbSlug = (database || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-');
+    
+    return `${dbSlug}/${cleanName}`;
+  }, []);
+  const [websiteLoading, setWebsiteLoading] = useState(false);
+
+  // VvebJS configuration
+  const VVEBJS_CONFIG = {
+    serverUrl: 'http://localhost:3030',
+    editorUrl: 'http://localhost:3030/editor.html',
+    generatedPagesPath: '/generated-realtors'
+  };
+
+  /**
+   * Generate a slug from realtor name for URL-safe paths
+   */
+  const generateRealtorSlug = useCallback((name, database) => {
+    if (!name) return null;
+    
+    const cleanName = name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .trim();
+    
+    const dbSlug = database
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-');
+    
+    return `${dbSlug}/${cleanName}`;
+  }, []);
+
+  /**
+   * Get the website URL for a realtor
+   */
+  const getRealtorWebsiteUrl = useCallback((contact, database) => {
+    const slug = generateRealtorSlug(contact.NAME || contact.name, database);
+    if (!slug) return null;
+    
+    return `${VVEBJS_CONFIG.serverUrl}${VVEBJS_CONFIG.generatedPagesPath}/${slug}.html`;
+  }, [generateRealtorSlug]);
+
+  /**
+   * Get the VvebJS editor URL for a realtor
+   */
+  const getRealtorEditorUrl = useCallback((contact, database) => {
+    const slug = generateRealtorSlug(contact.NAME || contact.name, database);
+    if (!slug) return null;
+    
+    // VvebJS editor expects 'page' parameter, not 'url'
+    const pagePath = `${VVEBJS_CONFIG.generatedPagesPath}/${slug}.html`;
+    return `${VVEBJS_CONFIG.editorUrl}?page=${encodeURIComponent(pagePath)}`;
+  }, [generateRealtorSlug]);
+
+  /**
+   * Check if a website exists for a realtor
+   */
+  const checkWebsiteExists = useCallback(async (contact, database) => {
+    try {
+      const websiteUrl = getRealtorWebsiteUrl(contact, database);
+      if (!websiteUrl) return false;
+      
+      const response = await fetch(websiteUrl, { method: 'HEAD' });
+      return response.ok;
+    } catch (error) {
+      console.error('Error checking website existence:', error);
+      return false;
+    }
+  }, [getRealtorWebsiteUrl]);
+
+  /**
+   * Generate a website for a realtor
+   */
+  const generateRealtorWebsite = useCallback(async (contact, database) => {
+    try {
+      setWebsiteLoading(true);
+      
+      const response = await fetch(`${VVEBJS_CONFIG.apiServerUrl}/api/generate/realtor/${contact.id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          database: database
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to generate website: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('Error generating website:', error);
+      throw error;
+    } finally {
+      setWebsiteLoading(false);
+    }
+  }, []);
+
+  /**
+   * Open the generated realtors index page
+   */
+  const openGeneratedIndex = useCallback(() => {
+    const indexUrl = `${VVEBJS_CONFIG.serverUrl}${VVEBJS_CONFIG.generatedPagesPath}/index.html`;
+    console.log('Opening generated realtors index:', indexUrl);
+    window.open(indexUrl, '_blank');
+  }, []);
+
+  /**
+   * Open realtor website in new tab
+   */
+  const openRealtorWebsite = useCallback(async (contact, database) => {
+    const websiteUrl = getRealtorWebsiteUrl(contact, database);
+    if (websiteUrl) {
+      console.log('Opening realtor website:', websiteUrl);
+      window.open(websiteUrl, '_blank');
+    } else {
+      console.warn('Could not generate website URL for contact:', contact);
+    }
+  }, [getRealtorWebsiteUrl]);
+
+  /**
+   * Open VvebJS editor for realtor website
+   */
+  const openRealtorEditor = useCallback(async (contact, database) => {
+    const websiteUrl = getRealtorWebsiteUrl(contact, database);
+    if (websiteUrl) {
+      const editorUrl = `${VVEBJS_CONFIG.editorUrl}?url=${encodeURIComponent(websiteUrl)}`;
+      console.log('Opening VvebJS editor:', editorUrl);
+      window.open(editorUrl, '_blank');
+    } else {
+      console.warn('Could not generate editor URL for contact:', contact);
+    }
+  }, [getRealtorWebsiteUrl]);
+
+  return {
+    websiteLoading,
+    generateRealtorSlug,
+    getRealtorWebsiteUrl,
+    getRealtorEditorUrl,
+    openRealtorWebsite,
+    openRealtorEditor,
+    openGeneratedIndex
+  };
+};

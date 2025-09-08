@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarah Johnson - Professional Real Estate</title>
+    
+    <!-- Google Fonts: Playfair Display + Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS VARIABLES - INKED ESTATE THEME */
+        :root {
+            --inked-primary-bg: #1a3d1a;
+            --inked-secondary-bg: #2d4a2d;
+            --inked-accent-bg: #4a6b4a;
+            --inked-text-primary: #f0f8f0;
+            --inked-text-secondary: #d8e8d8;
+            --inked-accent-color: #7bb87b;
+            --inked-gold-accent: #d4af37;
+            --inked-border-color: #5a7a5a;
+        }
+
+        /* GLOBAL RESET AND BASE STYLES */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+            font-family: 'Inter', sans-serif;
+            background: var(--inked-primary-bg);
+            color: var(--inked-text-primary);
+        }
+
+        .inked-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* NAVIGATION STYLING */
+        .inked-navbar {
+            background: var(--inked-primary-bg);
+            border-bottom: 2px solid var(--inked-accent-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 5%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .inked-navbar-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--inked-accent-color);
+            text-decoration: none;
+        }
+
+        .inked-navbar-nav {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        .inked-navbar-nav a {
+            color: var(--inked-text-primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            padding: 10px 0;
+        }
+
+        .inked-navbar-nav a:hover {
+            color: var(--inked-accent-color);
+        }
+
+        /* HERO SECTION - COMPATIBLE WITH GENERATOR CONTROLS */
+        .inked-hero {
+            background: linear-gradient(135deg, var(--inked-primary-bg) 0%, var(--inked-secondary-bg) 100%);
+            margin-top: 70px;
+            min-height: calc(100vh - 70px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* Hero background image layer (from generator) */
+        .inked-hero::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url("https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: blur(2px);
+            z-index: 1;
+        }
+
+        /* Hero overlay layer (from generator) */
+        .inked-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2;
+        }
+
+        /* Fallback pattern when no hero image */
+        .inked-hero[data-no-image="true"]::after {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23ffffff" stroke-width="0.5" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>') !important;
+            opacity: 0.3;
+        }
+
+        .inked-hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            width: 100%;
+            padding: 60px 5%;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 40px;
+            align-items: center;
+            justify-items: center;
+        }
+
+        /* AGENT PHOTO STYLING */
+        .inked-agent-photo {
+            width: 150px;
+            height: 150px;
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        .inked-agent-photo img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 4px solid var(--inked-accent-color);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            object-fit: cover;
+            display: block;
+        }
+
+        /* HERO TEXT STYLING */
+        .inked-hero-text {
+            text-align: center;
+            width: 100%;
+        }
+
+        .inked-hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--inked-text-primary);
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
+
+        .inked-hero-subtitle {
+            font-size: 1.4rem;
+            color: var(--inked-accent-color);
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        .inked-hero-description {
+            font-size: 1.1rem;
+            color: var(--inked-text-secondary);
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto 40px auto;
+        }
+
+        /* HERO BUTTONS */
+        .inked-hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .inked-btn {
+            display: inline-block;
+            padding: 15px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+
+        .inked-btn-primary {
+            background: var(--inked-accent-color);
+            color: var(--inked-primary-bg);
+        }
+
+        .inked-btn-primary:hover {
+            background: var(--inked-gold-accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(123, 184, 123, 0.3);
+        }
+
+        .inked-btn-secondary {
+            background: transparent;
+            color: var(--inked-text-primary);
+            border: 2px solid var(--inked-accent-color);
+        }
+
+        .inked-btn-secondary:hover {
+            background: var(--inked-accent-color);
+            color: var(--inked-primary-bg);
+            transform: translateY(-2px);
+        }
+
+        /* HERO STATS */
+        .inked-hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .inked-stat-item {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid var(--inked-border-color);
+            backdrop-filter: blur(10px);
+        }
+
+        .inked-stat-number {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--inked-accent-color);
+            margin-bottom: 8px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .inked-stat-label {
+            font-size: 0.9rem;
+            color: var(--inked-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* SECTIONS */
+        .inked-section {
+            padding: 80px 0;
+            background: var(--inked-secondary-bg);
+        }
+
+        .inked-section:nth-child(even) {
+            background: var(--inked-primary-bg);
+        }
+
+        .inked-section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--inked-text-primary);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .inked-section-subtitle {
+            font-size: 1.2rem;
+            color: var(--inked-text-secondary);
+            text-align: center;
+            margin-bottom: 60px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* PROPERTIES GRID */
+        .inked-properties-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .inked-property-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid var(--inked-border-color);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .inked-property-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            border-color: var(--inked-accent-color);
+        }
+
+        .inked-property-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .inked-property-content {
+            padding: 25px;
+        }
+
+        .inked-property-price {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--inked-accent-color);
+            margin-bottom: 10px;
+        }
+
+        .inked-property-address {
+            font-size: 1.1rem;
+            color: var(--inked-text-primary);
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .inked-property-details {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            color: var(--inked-text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .inked-property-description {
+            color: var(--inked-text-secondary);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        /* PROPERTY CARDS (Generated by ModularWebsiteGenerator) */
+        .property-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid var(--inked-border-color);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .property-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            border-color: var(--inked-accent-color);
+        }
+
+        .property-image {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            overflow: hidden;
+        }
+
+        .property-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .property-card:hover .property-image img {
+            transform: scale(1.05);
+        }
+
+        .property-status {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--inked-accent-color);
+            color: var(--inked-primary-bg);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .property-info {
+            padding: 25px;
+        }
+
+        .property-price {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--inked-accent-color);
+            margin-bottom: 10px;
+        }
+
+        .property-address {
+            font-size: 1.1rem;
+            color: var(--inked-text-primary);
+            margin-bottom: 8px;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .property-location {
+            font-size: 0.95rem;
+            color: var(--inked-text-secondary);
+            margin-bottom: 15px;
+        }
+
+        .property-details {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            color: var(--inked-text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .property-description {
+            color: var(--inked-text-secondary);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        /* TESTIMONIALS */
+        .inked-testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .inked-testimonial-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid var(--inked-border-color);
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .inked-testimonial-text {
+            font-style: italic;
+            color: var(--inked-text-secondary);
+            line-height: 1.7;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+        }
+
+        .inked-testimonial-author {
+            color: var(--inked-accent-color);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        /* CONTACT FORM */
+        .inked-contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            border-radius: 15px;
+            border: 1px solid var(--inked-border-color);
+            backdrop-filter: blur(10px);
+        }
+
+        .inked-form-group {
+            margin-bottom: 25px;
+        }
+
+        .inked-form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--inked-text-primary);
+            font-weight: 500;
+        }
+
+        .inked-form-input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--inked-border-color);
+            border-radius: 8px;
+            color: var(--inked-text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .inked-form-input:focus {
+            outline: none;
+            border-color: var(--inked-accent-color);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .inked-form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* FOOTER */
+        .inked-footer {
+            background: var(--inked-primary-bg);
+            padding: 60px 0 30px;
+            border-top: 2px solid var(--inked-accent-color);
+        }
+
+        .inked-footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .inked-footer-section h3 {
+            color: var(--inked-accent-color);
+            margin-bottom: 20px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+        }
+
+        .inked-footer-section p,
+        .inked-footer-section a {
+            color: var(--inked-text-secondary);
+            line-height: 1.6;
+            text-decoration: none;
+        }
+
+        .inked-footer-section a:hover {
+            color: var(--inked-accent-color);
+        }
+
+        .inked-footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid var(--inked-border-color);
+            color: var(--inked-text-secondary);
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 768px) {
+            .inked-navbar {
+                height: 60px;
+                padding: 0 4%;
+            }
+
+            .inked-navbar-brand {
+                font-size: 1.5rem;
+            }
+
+            .inked-navbar-nav {
+                gap: 20px;
+            }
+
+            .inked-hero {
+                margin-top: 60px;
+                min-height: calc(100vh - 60px);
+            }
+
+            .inked-hero-content {
+                padding: 40px 4%;
+            }
+
+            .inked-hero-title {
+                font-size: 2.5rem;
+            }
+
+            .inked-hero-subtitle {
+                font-size: 1.2rem;
+            }
+
+            .inked-hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .inked-btn {
+                width: 100%;
+                max-width: 280px;
+            }
+
+            .inked-hero-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+
+            .inked-section {
+                padding: 60px 0;
+            }
+
+            .inked-section-title {
+                font-size: 2.2rem;
+            }
+
+            .inked-properties-grid {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+
+            .property-card {
+                margin-bottom: 20px;
+            }
+
+            .property-image {
+                height: 200px;
+            }
+
+            .inked-testimonials-grid {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+
+            .inked-contact-form {
+                padding: 30px 20px;
+            }
+
+            .inked-container {
+                padding: 0 15px;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .inked-hero-content {
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+
+            .inked-container {
+                max-width: 1400px;
+            }
+        }
+
+        @media (min-width: 1400px) {
+            .inked-container {
+                max-width: 1600px;
+            }
+
+            .inked-hero-content {
+                max-width: 1400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="inked-navbar">
+        <a href="#" class="inked-navbar-brand">Sarah Johnson</a>
+        <ul class="inked-navbar-nav">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#properties">Properties</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#testimonials">Testimonials</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="inked-hero">
+        <div class="inked-hero-content">
+            <!-- Agent Photo -->
+            <div class="inked-agent-photo">
+                <img src="https://via.placeholder.com/600x600/f8fafc/7f8c8d?text=Sarah%2BJohnson" alt="Sarah Johnson" onerror="this.src='https://via.placeholder.com/150x150/7bb87b/ffffff?text=Sarah Johnson'" />
+            </div>
+
+            <!-- Hero Text -->
+            <div class="inked-hero-text">
+                <h1 class="inked-hero-title">Sarah Johnson</h1>
+                <h2 class="inked-hero-subtitle">Professional Real Estate Agent</h2>
+                <p class="inked-hero-description">Professional real estate agent with over 10 years of experience helping clients find their perfect home.</p>
+            </div>
+
+            <!-- Hero Buttons -->
+            <div class="inked-hero-buttons">
+                <a href="#properties" class="inked-btn inked-btn-primary">View Properties</a>
+                <a href="#contact" class="inked-btn inked-btn-secondary">Contact Me</a>
+            </div>
+
+            <!-- Hero Stats -->
+            <div class="inked-hero-stats">
+                <div class="inked-stat-item">
+                    <div class="inked-stat-number">1</div>
+                    <div class="inked-stat-label">Properties</div>
+                </div>
+                <div class="inked-stat-item">
+                    <div class="inked-stat-number">10+</div>
+                    <div class="inked-stat-label">Years Experience</div>
+                </div>
+                <div class="inked-stat-item">
+                    <div class="inked-stat-number">98%</div>
+                    <div class="inked-stat-label">Client Satisfaction</div>
+                </div>
+                <div class="inked-stat-item">
+                    <div class="inked-stat-number">1</div>
+                    <div class="inked-stat-label">Sales Closed</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Properties Section -->
+    <section id="properties" class="inked-section">
+        <div class="inked-container">
+            <h2 class="inked-section-title">Featured Properties</h2>
+            <p class="inked-section-subtitle">Discover exceptional homes and investment opportunities</p>
+            
+            <div class="inked-properties-grid">
+                
+      <div class="property-card">
+        <div class="property-image">
+          <img src="https://via.placeholder.com/400x300/f8fafc/7f8c8d?text=Property+Image" alt="623 Success Drive, Luxury Heights" loading="lazy">
+          <div class="property-status">For Sale</div>
+        </div>
+        <div class="property-info">
+          <div class="property-price">$850,000</div>
+          <div class="property-address">623 Success Drive, Luxury Heights</div>
+          
+        </div>
+      </div>
+    
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="inked-section">
+        <div class="inked-container">
+            <h2 class="inked-section-title">About Sarah Johnson</h2>
+            <p class="inked-section-subtitle">Professional expertise you can trust</p>
+            
+            <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+                <p style="font-size: 1.1rem; line-height: 1.8; color: var(--inked-text-secondary); margin-bottom: 40px;">
+                    Professional real estate agent with over 10 years of experience helping clients find their perfect home.
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; margin-top: 40px;">
+                    <div style="text-align: center;">
+                        <h3 style="color: var(--inked-accent-color); margin-bottom: 10px;">Experience</h3>
+                        <p style="color: var(--inked-text-secondary);">10+ years in real estate</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <h3 style="color: var(--inked-accent-color); margin-bottom: 10px;">Specialization</h3>
+                        <p style="color: var(--inked-text-secondary);">Residential & Commercial</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <h3 style="color: var(--inked-accent-color); margin-bottom: 10px;">Service Area</h3>
+                        <p style="color: var(--inked-text-secondary);">Service Area Available</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="inked-section">
+        <div class="inked-container">
+            <h2 class="inked-section-title">Client Testimonials</h2>
+            <p class="inked-section-subtitle">What my clients say about working with me</p>
+            
+            <div class="inked-testimonials-grid">
+                
+      <div class="testimonial-content">
+        <div class="testimonial-quote">
+          "Sarah Johnson was extremely helpful with our home purchase. As first time buyers, 
+          we felt very comfortable knowing we had their expertise. They were knowledgeable 
+          about the market and helped us navigate every step of the process with professionalism and care."
+        </div>
+        <div class="testimonial-author">SATISFIED CLIENT</div>
+      </div>
+    
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="inked-section">
+        <div class="inked-container">
+            <h2 class="inked-section-title">Get In Touch</h2>
+            <p class="inked-section-subtitle">Ready to find your dream home? Let's start the conversation</p>
+            
+            <form class="inked-contact-form">
+                <div class="inked-form-group">
+                    <label for="name" class="inked-form-label">Full Name</label>
+                    <input type="text" id="name" name="name" class="inked-form-input" required>
+                </div>
+                <div class="inked-form-group">
+                    <label for="email" class="inked-form-label">Email Address</label>
+                    <input type="email" id="email" name="email" class="inked-form-input" required>
+                </div>
+                <div class="inked-form-group">
+                    <label for="phone" class="inked-form-label">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" class="inked-form-input">
+                </div>
+                <div class="inked-form-group">
+                    <label for="message" class="inked-form-label">Message</label>
+                    <textarea id="message" name="message" class="inked-form-input inked-form-textarea" required></textarea>
+                </div>
+                <button type="submit" class="inked-btn inked-btn-primary" style="width: 100%;">Send Message</button>
+            </form>
+
+            <div style="text-align: center; margin-top: 50px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px;">
+                <div>
+                    <h3 style="color: var(--inked-accent-color); margin-bottom: 10px;">Phone</h3>
+                    <p style="color: var(--inked-text-secondary);">(832) 786-1722</p>
+                </div>
+                <div>
+                    <h3 style="color: var(--inked-accent-color); margin-bottom: 10px;">Email</h3>
+                    <p style="color: var(--inked-text-secondary);">sarah@inkedestate.com</p>
+                </div>
+                <div>
+                    <h3 style="color: var(--inked-accent-color); margin-bottom: 10px;">Office</h3>
+                    <p style="color: var(--inked-text-secondary);">Inked Estate Real Estate</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="inked-footer">
+        <div class="inked-container">
+            <div class="inked-footer-content">
+                <div class="inked-footer-section">
+                    <h3>Sarah Johnson</h3>
+                    <p>Professional Real Estate Services</p>
+                    <p>Service Area Available</p>
+                </div>
+                <div class="inked-footer-section">
+                    <h3>Contact Information</h3>
+                    <p>Phone: (832) 786-1722</p>
+                    <p>Email: sarah@inkedestate.com</p>
+                    <p>Office: Inked Estate Real Estate</p>
+                </div>
+                <div class="inked-footer-section">
+                    <h3>Services</h3>
+                    <p>Residential Sales</p>
+                    <p>Commercial Properties</p>
+                    <p>Property Management</p>
+                    <p>Investment Consultation</p>
+                </div>
+            </div>
+            <div class="inked-footer-bottom">
+                <p>&copy; 2024 Sarah Johnson. All rights reserved. | Professional Real Estate Services</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=CSV Cleaner Tool
+Comment=Convert realtor CSV files to standardized CRM format
+Exec=python3 "/home/realm/Documents/ColdCalling CRM/CSV cleaner/desktop_launcher.py"
+Icon=text-csv
+Terminal=false
+Categories=Office;Utility;
+StartupNotify=true
+MimeType=text/csv;
+X-Desktop-File-Install-Version=0.26

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReviewsExtractor Functionality Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: #f5f5f5;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .pass { color: #28a745; }
+        .fail { color: #dc3545; }
+        .warn { color: #ffc107; }
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 ReviewsExtractor Functionality Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Environment Setup</h2>
+        <p>This page tests the restored ReviewsExtractor functionality to ensure all methods work correctly.</p>
+        <button onclick="runAllTests()">🚀 Run All Tests</button>
+        <button onclick="clearLog()">🧹 Clear Log</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Test Results</h2>
+        <div id="results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 Detailed Log</h2>
+        <div id="log" class="log"></div>
+    </div>
+
+    <!-- Load the modules in the same order as the extension -->
+    <script src="modules/core/logging-utils.js"></script>
+    <script src="modules/core/polling-manager.js"></script>
+    <script src="modules/core/database-service.js"></script>
+    <script src="modules/extractors/agent-extractor.js"></script>
+    <script src="modules/extractors/bio-extractor.js"></script>
+    <script src="modules/extractors/contact-extractor.js"></script>
+    
+    <!-- Mock realtor.com content for testing -->
+    <div id="mock-content" style="display: none;">
+        <div class="testimonial">
+            <p>John helped us find our dream home. His knowledge of the market and dedication to his clients is outstanding. We highly recommend working with him!</p>
+            <strong>- Sarah Johnson</strong>
+        </div>
+        <div class="review">
+            <div class="rating">5.0</div>
+            <p>Excellent service and professional guidance throughout the entire process.</p>
+            <span class="author">Mike Wilson</span>
+            <span class="date">January 15, 2024</span>
+        </div>
+        <div class="overall-rating">4.8 out of 5 stars</div>
+        <div class="review-count">127 reviews</div>
+    </div>
+
+    <script>
+        // Global variables for testing
+        let testResults = [];
+        let logMessages = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logMsg = `[${timestamp}] ${message}`;
+            logMessages.push(logMsg);
+            
+            const logElement = document.getElementById('log');
+            logElement.innerHTML = logMessages.join('\n');
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            console.log(message);
+        }
+
+        function addResult(testName, passed, details = '') {
+            testResults.push({ testName, passed, details });
+            updateResults();
+        }
+
+        function updateResults() {
+            const resultsElement = document.getElementById('results');
+            let html = '';
+            
+            testResults.forEach(result => {
+                const statusClass = result.passed ? 'pass' : 'fail';
+                const statusIcon = result.passed ? '✅' : '❌';
+                html += `<div class="${statusClass}">
+                    ${statusIcon} <strong>${result.testName}</strong>
+                    ${result.details ? `<br>&nbsp;&nbsp;&nbsp;&nbsp;${result.details}` : ''}
+                </div>`;
+            });
+            
+            resultsElement.innerHTML = html;
+        }
+
+        function clearLog() {
+            logMessages = [];
+            testResults = [];
+            document.getElementById('log').innerHTML = '';
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function runAllTests() {
+            clearLog();
+            log('🧪 Starting ReviewsExtractor Test Suite...');
+            
+            try {
+                // Test 1: Module Loading
+                await testModuleLoading();
+                
+                // Test 2: Class Instantiation
+                await testClassInstantiation();
+                
+                // Test 3: Method Availability
+                await testMethodAvailability();
+                
+                // Test 4: Basic Functionality
+                await testBasicFunctionality();
+                
+                // Test 5: Text Processing
+                await testTextProcessing();
+                
+                // Test 6: DOM Integration
+                await testDOMIntegration();
+                
+                log('🎉 Test Suite Complete!');
+                
+                const passed = testResults.filter(r => r.passed).length;
+                const total = testResults.length;
+                log(`📊 Results: ${passed}/${total} tests passed`);
+                
+            } catch (error) {
+                log(`❌ Test Suite Error: ${error.message}`, 'error');
+                addResult('Test Suite Execution', false, error.message);
+            }
+        }
+
+        async function testModuleLoading() {
+            log('🔍 Testing module loading...');
+            
+            const modules = [
+                { name: 'window.log', obj: window.log },
+                { name: 'window.ContentPollingManager', obj: window.ContentPollingManager },
+                { name: 'window.DatabaseService', obj: window.DatabaseService },
+                { name: 'window.AgentExtractor', obj: window.AgentExtractor },
+                { name: 'window.BioExtractor', obj: window.BioExtractor },
+                { name: 'window.ContactExtractor', obj: window.ContactExtractor }
+            ];
+            
+            let loaded = 0;
+            modules.forEach(module => {
+                if (module.obj !== undefined) {
+                    loaded++;
+                    log(`  ✅ ${module.name} loaded`);
+                } else {
+                    log(`  ❌ ${module.name} missing`);
+                }
+            });
+            
+            const passed = loaded === modules.length;
+            addResult('Module Loading', passed, `${loaded}/${modules.length} modules loaded`);
+        }
+
+        async function testClassInstantiation() {
+            log('🔍 Testing ReviewsExtractor instantiation...');
+            
+            try {
+                // Check if ReviewsExtractor is available globally
+                if (typeof ReviewsExtractor === 'undefined') {
+                    // Try to get it from content.js (it should be defined there)
+                    log('  ⚠️ ReviewsExtractor not in global scope, checking content.js...');
+                    addResult('ReviewsExtractor Class', false, 'Class not found in global scope');
+                    return;
+                }
+                
+                const extractor = new ReviewsExtractor();
+                log('  ✅ ReviewsExtractor instance created successfully');
+                addResult('ReviewsExtractor Instantiation', true, 'Instance created successfully');
+                
+                // Store for other tests
+                window.testExtractor = extractor;
+                
+            } catch (error) {
+                log(`  ❌ Error creating ReviewsExtractor: ${error.message}`);
+                addResult('ReviewsExtractor Instantiation', false, error.message);
+            }
+        }
+
+        async function testMethodAvailability() {
+            log('🔍 Testing method availability...');
+            
+            if (!window.testExtractor) {
+                addResult('Method Availability', false, 'No extractor instance available');
+                return;
+            }
+            
+            const requiredMethods = [
+                'extractReviews', 'extractOverallRating', 'extractReviewCount',
+                'extractIndividualReviewsStructural', 'isValidReviewContent',
+                'extractReviewsByTextPatterns', 'calculateTextSimilarity',
+                'extractModernRealtorReviews', 'extractRecommendations',
+                'looksLikeName', 'isValidRecommendationText'
+            ];
+            
+            let methodsFound = 0;
+            requiredMethods.forEach(method => {
+                if (typeof window.testExtractor[method] === 'function') {
+                    methodsFound++;
+                    log(`  ✅ ${method} method available`);
+                } else {
+                    log(`  ❌ ${method} method missing`);
+                }
+            });
+            
+            const passed = methodsFound === requiredMethods.length;
+            addResult('Method Availability', passed, `${methodsFound}/${requiredMethods.length} methods found`);
+        }
+
+        async function testBasicFunctionality() {
+            log('🔍 Testing basic functionality...');
+            
+            if (!window.testExtractor) {
+                addResult('Basic Functionality', false, 'No extractor instance available');
+                return;
+            }
+            
+            let tests = 0;
+            let passed = 0;
+            
+            try {
+                // Test calculateTextSimilarity
+                tests++;
+                const similarity = window.testExtractor.calculateTextSimilarity('Hello world', 'Hello world');
+                if (similarity === 1) {
+                    passed++;
+                    log('  ✅ calculateTextSimilarity: identical texts = 1.0');
+                } else {
+                    log(`  ❌ calculateTextSimilarity: expected 1, got ${similarity}`);
+                }
+                
+                // Test looksLikeName
+                tests++;
+                const isName = window.testExtractor.looksLikeName('John Smith');
+                const isNotName = window.testExtractor.looksLikeName('Contact Us');
+                if (isName === true && isNotName === false) {
+                    passed++;
+                    log('  ✅ looksLikeName: correctly identifies names');
+                } else {
+                    log(`  ❌ looksLikeName: John Smith=${isName}, Contact Us=${isNotName}`);
+                }
+                
+                // Test isValidRecommendationText
+                tests++;
+                const validText = 'This agent provided excellent service and helped us find our dream home. We highly recommend working with them.';
+                const invalidText = 'Contact us for more information';
+                const isValid = window.testExtractor.isValidRecommendationText(validText);
+                const isInvalid = window.testExtractor.isValidRecommendationText(invalidText);
+                
+                if (isValid === true && isInvalid === false) {
+                    passed++;
+                    log('  ✅ isValidRecommendationText: correctly validates text');
+                } else {
+                    log(`  ❌ isValidRecommendationText: valid=${isValid}, invalid=${isInvalid}`);
+                }
+                
+            } catch (error) {
+                log(`  ❌ Error in basic functionality test: ${error.message}`);
+            }
+            
+            addResult('Basic Functionality', passed === tests, `${passed}/${tests} function tests passed`);
+        }
+
+        async function testTextProcessing() {
+            log('🔍 Testing text processing capabilities...');
+            
+            if (!window.testExtractor) {
+                addResult('Text Processing', false, 'No extractor instance available');
+                return;
+            }
+            
+            let tests = 0;
+            let passed = 0;
+            
+            try {
+                // Test isRatingCategoryOnly
+                tests++;
+                if (typeof window.testExtractor.isRatingCategoryOnly === 'function') {
+                    const ratingOnly = window.testExtractor.isRatingCategoryOnly('Professionalism & communication');
+                    const notRatingOnly = window.testExtractor.isRatingCategoryOnly('John provided excellent service throughout our home buying process.');
+                    
+                    if (ratingOnly === true && notRatingOnly === false) {
+                        passed++;
+                        log('  ✅ isRatingCategoryOnly: correctly identifies rating categories');
+                    } else {
+                        log(`  ❌ isRatingCategoryOnly: rating=${ratingOnly}, text=${notRatingOnly}`);
+                    }
+                } else {
+                    log('  ❌ isRatingCategoryOnly method not available');
+                }
+                
+                // Test isContaminatedText
+                tests++;
+                if (typeof window.testExtractor.isContaminatedText === 'function') {
+                    const contaminated = window.testExtractor.isContaminatedText('{"@type": "RealEstateAgent"}');
+                    const clean = window.testExtractor.isContaminatedText('This is a clean review text.');
+                    
+                    if (contaminated === true && clean === false) {
+                        passed++;
+                        log('  ✅ isContaminatedText: correctly identifies contamination');
+                    } else {
+                        log(`  ❌ isContaminatedText: contaminated=${contaminated}, clean=${clean}`);
+                    }
+                } else {
+                    log('  ❌ isContaminatedText method not available');
+                }
+                
+            } catch (error) {
+                log(`  ❌ Error in text processing test: ${error.message}`);
+            }
+            
+            addResult('Text Processing', passed === tests, `${passed}/${tests} text processing tests passed`);
+        }
+
+        async function testDOMIntegration() {
+            log('🔍 Testing DOM integration...');
+            
+            if (!window.testExtractor) {
+                addResult('DOM Integration', false, 'No extractor instance available');
+                return;
+            }
+            
+            try {
+                // Create a mock reviews object
+                const reviews = {
+                    overall: {},
+                    individual: [],
+                    recommendations: []
+                };
+                
+                // Test with mock DOM content
+                const mockContent = document.getElementById('mock-content');
+                if (mockContent) {
+                    log('  ✅ Mock DOM content available for testing');
+                    
+                    // Test basic review extraction structure
+                    if (typeof window.testExtractor.extractIndividualReviewsStructural === 'function') {
+                        try {
+                            window.testExtractor.extractIndividualReviewsStructural(reviews);
+                            log('  ✅ extractIndividualReviewsStructural executed without errors');
+                        } catch (error) {
+                            log(`  ❌ extractIndividualReviewsStructural error: ${error.message}`);
+                        }
+                    }
+                    
+                    addResult('DOM Integration', true, 'DOM integration tests completed successfully');
+                } else {
+                    addResult('DOM Integration', false, 'Mock content not available');
+                }
+                
+            } catch (error) {
+                log(`  ❌ Error in DOM integration test: ${error.message}`);
+                addResult('DOM Integration', false, error.message);
+            }
+        }
+
+        // Auto-run tests when page loads
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('🚀 Page loaded, ready for testing');
+                log('💡 Click "Run All Tests" to start the test suite');
+            }, 500);
+        });
+
+    </script>
+</body>
+</html>

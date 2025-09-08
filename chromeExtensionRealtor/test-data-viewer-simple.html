@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Viewer Test - Simple</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #e31837, #c41230);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+        }
+        
+        .result {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧪 Chrome Extension Data Viewer Test</h1>
+        <p>Test the new data viewer functionality for the Chrome Extension</p>
+    </div>
+    
+    <button class="btn" onclick="testDataViewer()">🚀 Test Data Viewer with Sample Data</button>
+    <button class="btn" onclick="testExtraction()">📊 Simulate Extension Extraction</button>
+    
+    <div id="result" class="result" style="display: none;">
+        <h3>Test Result:</h3>
+        <p id="resultText"></p>
+    </div>
+    
+    <script>
+        function testDataViewer() {
+            // Sample extracted data (like what the extension would get)
+            const sampleData = {
+                url: "https://www.realtor.com/realestateagents/56d5e56eb5cc660100bc9934",
+                extractedAt: new Date().toISOString(),
+                pageType: "agent",
+                agent: {
+                    name: "BJ Ward",
+                    bio: null,
+                    photo: null,
+                    experience: null,
+                    rating: "5.0",
+                    priceRange: "$750K - $800K"
+                },
+                contact: {
+                    phone: "+ (805) 844-9440",
+                    email: null,
+                    website: "http://www.comfortres.com/"
+                },
+                office: {
+                    name: "Owner of Comfort Real Estate",
+                    address: null,
+                    phone: null
+                },
+                reviews: {
+                    overall: {
+                        rating: "5.0",
+                        count: "932"
+                    }
+                },
+                listings: [
+                    {
+                        address: "$789k",
+                        price: "789.00",
+                        bedrooms: null,
+                        bathrooms: null,
+                        square_feet: null,
+                        status: "For Sale"
+                    },
+                    {
+                        address: "$762.9k", 
+                        price: "762.00",
+                        bedrooms: null,
+                        bathrooms: null,
+                        square_feet: null,
+                        status: "For Sale"
+                    }
+                ],
+                specializations: [],
+                areasServed: "",
+                socialMedia: {},
+                images: {
+                    agentPhoto: null,
+                    propertyPhotos: [
+                        "https://ap.rdcpix.com/b61cd10e7995074ef179d47a3939b720l-m2955129449rd-w1024_h720.jpg",
+                        "https://ap.rdcpix.com/557a4f720dc929bf85c8bb1c86ae197bl-m1650856741rd-w1024_h720.jpg"
+                    ]
+                }
+            };
+            
+            openDataViewer(sampleData);
+            
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('resultText').innerHTML = 
+                '✅ Data viewer opened with sample data! Check the new window that opened.<br>' +
+                '<strong>Sample data includes:</strong><br>' +
+                '• Agent: BJ Ward<br>' +
+                '• Contact info: Phone, website<br>' +
+                '• Office: Comfort Real Estate<br>' +
+                '• Reviews: 5.0 rating, 932 reviews<br>' +
+                '• Properties: 2 listings<br>' +
+                '• Images: 2 property photos';
+        }
+        
+        function testExtraction() {
+            // Simulate what happens when the extension runs
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('resultText').innerHTML = 
+                '🎯 <strong>Extension Simulation:</strong><br>' +
+                '1. Extension would inject into Realtor.com page<br>' +
+                '2. Click "Extract Data" button<br>' +
+                '3. Extension extracts available data<br>' +
+                '4. Data viewer opens automatically<br>' +
+                '5. You can review what was extracted vs. missing<br><br>' +
+                '💡 <strong>Next step:</strong> Test on actual Realtor.com pages!';
+        }
+        
+        function openDataViewer(data) {
+            const summary = generateExtractionSummary(data);
+            const htmlContent = generateHTML(data, summary);
+            
+            const newWindow = window.open('', 'extractedData', 
+                'width=1200,height=800,scrollbars=yes,resizable=yes,toolbar=no,menubar=no');
+            
+            if (newWindow) {
+                newWindow.document.write(htmlContent);
+                newWindow.document.close();
+                console.log('📊 Data viewer opened in new window');
+            } else {
+                alert('❌ Popup blocked! Please allow popups for this site and try again.');
+            }
+        }
+        
+        function generateExtractionSummary(data) {
+            const summary = {
+                total: 0,
+                extracted: 0,
+                missing: 0,
+                quality: 0,
+                categories: {}
+            };
+
+            const categories = {
+                'Agent Info': data.agent || {},
+                'Contact': data.contact || {},
+                'Office': data.office || {},
+                'Properties': data.listings || [],
+                'Reviews': data.reviews || {},
+                'Specializations': data.specializations || [],
+                'Areas Served': data.areasServed || '',
+                'Social Media': data.socialMedia || {},
+                'Images': data.images || {}
+            };
+
+            Object.entries(categories).forEach(([category, categoryData]) => {
+                const analysis = analyzeCategoryData(categoryData);
+                summary.categories[category] = analysis;
+                summary.total += analysis.total;
+                summary.extracted += analysis.extracted;
+                summary.missing += analysis.missing;
+            });
+
+            summary.quality = summary.total > 0 ? (summary.extracted / summary.total * 100).toFixed(1) : 0;
+            
+            return summary;
+        }
+        
+        function analyzeCategoryData(data) {
+            const analysis = { total: 0, extracted: 0, missing: 0, fields: [] };
+            
+            if (Array.isArray(data)) {
+                analysis.total = 1;
+                analysis.extracted = data.length > 0 ? 1 : 0;
+                analysis.missing = data.length === 0 ? 1 : 0;
+                analysis.fields.push({ 
+                    name: 'items', 
+                    value: data.length + ' items', 
+                    status: data.length > 0 ? 'success' : 'missing' 
+                });
+            } else if (typeof data === 'object' && data !== null) {
+                Object.entries(data).forEach(([key, value]) => {
+                    analysis.total++;
+                    const hasValue = value !== null && value !== undefined && value !== '' && 
+                                     (Array.isArray(value) ? value.length > 0 : true);
+                    
+                    if (hasValue) {
+                        analysis.extracted++;
+                        analysis.fields.push({ 
+                            name: key, 
+                            value: formatValue(value), 
+                            status: 'success' 
+                        });
+                    } else {
+                        analysis.missing++;
+                        analysis.fields.push({ 
+                            name: key, 
+                            value: 'Not extracted', 
+                            status: 'missing' 
+                        });
+                    }
+                });
+            } else {
+                analysis.total = 1;
+                const hasValue = data !== null && data !== undefined && data !== '';
+                analysis.extracted = hasValue ? 1 : 0;
+                analysis.missing = hasValue ? 0 : 1;
+                analysis.fields.push({ 
+                    name: 'value', 
+                    value: hasValue ? formatValue(data) : 'Not extracted', 
+                    status: hasValue ? 'success' : 'missing' 
+                });
+            }
+            
+            return analysis;
+        }
+        
+        function formatValue(value) {
+            if (value === null || value === undefined || value === '') {
+                return 'Not extracted';
+            }
+            
+            if (Array.isArray(value)) {
+                return value.length + ' items';
+            }
+            
+            if (typeof value === 'object') {
+                return 'Object data';
+            }
+            
+            if (typeof value === 'string' && value.length > 100) {
+                return value.substring(0, 100) + '...';
+            }
+            
+            return String(value);
+        }
+        
+        function generateHTML(data, summary) {
+            const qualityColor = summary.quality >= 70 ? '#28a745' : summary.quality >= 40 ? '#ffc107' : '#dc3545';
+            const qualityClass = summary.quality >= 70 ? 'success' : summary.quality >= 40 ? 'warning' : 'danger';
+            
+            let categoriesHTML = '';
+            Object.entries(summary.categories).forEach(([category, analysis]) => {
+                const scoreClass = analysis.extracted / analysis.total >= 0.7 ? 'score-high' : 
+                                  analysis.extracted / analysis.total >= 0.4 ? 'score-medium' : 'score-low';
+                
+                let fieldsHTML = '';
+                analysis.fields.forEach(field => {
+                    fieldsHTML += '<div class="field-item">' +
+                        '<div class="field-name">' + field.name + '</div>' +
+                        '<div class="field-value ' + field.status + '">' + field.value + '</div>' +
+                        '</div>';
+                });
+                
+                categoriesHTML += '<div class="category-card">' +
+                    '<div class="category-header">' +
+                        '<div class="category-title">' + category + '</div>' +
+                        '<div class="category-score ' + scoreClass + '">' +
+                            analysis.extracted + '/' + analysis.total +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="category-content">' + fieldsHTML + '</div>' +
+                    '</div>';
+            });
+            
+            return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realtor Data Extraction Results</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #e31837, #c41230);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .summary {
+            background: white;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            border-left: 4px solid;
+        }
+        
+        .stat-card.success { border-left-color: #28a745; }
+        .stat-card.warning { border-left-color: #ffc107; }
+        .stat-card.danger { border-left-color: #dc3545; }
+        
+        .stat-value { font-size: 24px; font-weight: bold; margin-bottom: 5px; }
+        .stat-label { color: #666; font-size: 14px; }
+        
+        .quality-meter {
+            background: #e9ecef;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .quality-fill {
+            height: 100%;
+            width: ${summary.quality}%;
+            background: ${qualityColor};
+            border-radius: 10px;
+        }
+        
+        .content {
+            margin: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 1024px) {
+            .content { grid-template-columns: 1fr; }
+        }
+        
+        .category-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .category-header {
+            background: #f8f9fa;
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .category-title { font-weight: 600; }
+        
+        .category-score {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .score-high { background: #d4edda; color: #155724; }
+        .score-medium { background: #fff3cd; color: #856404; }
+        .score-low { background: #f8d7da; color: #721c24; }
+        
+        .category-content {
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .field-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f1f1;
+        }
+        
+        .field-item:last-child { border-bottom: none; }
+        
+        .field-name {
+            font-weight: 500;
+            color: #495057;
+            min-width: 120px;
+        }
+        
+        .field-value {
+            flex: 1;
+            text-align: right;
+            margin-left: 10px;
+            word-break: break-word;
+        }
+        
+        .field-value.success { color: #28a745; }
+        .field-value.missing { color: #dc3545; font-style: italic; }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            background: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Realtor Data Extraction Results</h1>
+        <div>${data.url || 'Unknown URL'}</div>
+        <div style="margin-top: 10px; font-size: 14px;">
+            Extracted: ${new Date(data.extractedAt || Date.now()).toLocaleString()}
+        </div>
+    </div>
+
+    <div class="summary">
+        <div class="summary-stats">
+            <div class="stat-card success">
+                <div class="stat-value">${summary.extracted}</div>
+                <div class="stat-label">Fields Extracted</div>
+            </div>
+            <div class="stat-card danger">
+                <div class="stat-value">${summary.missing}</div>
+                <div class="stat-label">Fields Missing</div>
+            </div>
+            <div class="stat-card ${qualityClass}">
+                <div class="stat-value">${summary.quality}%</div>
+                <div class="stat-label">Data Quality</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">${Object.keys(summary.categories).length}</div>
+                <div class="stat-label">Categories</div>
+            </div>
+        </div>
+        
+        <div class="quality-meter">
+            <div class="quality-fill"></div>
+        </div>
+        
+        <div class="actions">
+            <button class="btn" onclick="copyData()">📋 Copy JSON</button>
+            <button class="btn" onclick="downloadData()">💾 Download</button>
+        </div>
+    </div>
+
+    <div class="content">
+        ${categoriesHTML}
+    </div>
+
+    <script>
+        const extractedData = ${JSON.stringify(data, null, 2)};
+        
+        function copyData() {
+            navigator.clipboard.writeText(JSON.stringify(extractedData, null, 2)).then(() => {
+                alert('Data copied to clipboard!');
+            });
+        }
+        
+        function downloadData() {
+            const content = JSON.stringify(extractedData, null, 2);
+            const blob = new Blob([content], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'realtor-data-' + Date.now() + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            alert('File downloaded!');
+        }
+    </script>
+</body>
+</html>`;
+        }
+    </script>
+</body>
+</html>

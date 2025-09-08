@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Tab Opening - Chrome Extension</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        .test-button {
+            background: #e31837;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .test-button:hover {
+            background: #c41e3a;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏠 Chrome Extension Tab Opening Test</h1>
+        <p>This page tests whether the Chrome extension opens extraction results in new tabs instead of new windows.</p>
+        
+        <div class="test-section">
+            <h3>Test 1: Message Passing to Background Script</h3>
+            <p>Tests if the content script can communicate with the background script for tab creation.</p>
+            <button class="test-button" onclick="testMessagePassing()">Test Message Passing</button>
+            <div id="message-status" class="status info" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 2: Tab Creation</h3>
+            <p>Tests if the extension can create a new tab with HTML content.</p>
+            <button class="test-button" onclick="testTabCreation()">Test Tab Creation</button>
+            <div id="tab-status" class="status info" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 3: Full Extraction Flow</h3>
+            <p>Tests the complete extraction process that should open results in a new tab.</p>
+            <button class="test-button" onclick="testFullExtraction()">Test Full Extraction</button>
+            <div id="extraction-status" class="status info" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Expected Behavior</h3>
+            <ul>
+                <li>✅ Results should open in a <strong>new tab</strong> (not a new window)</li>
+                <li>✅ Tab should contain formatted extraction results</li>
+                <li>✅ No popup blocking warnings should appear</li>
+                <li>❌ Should NOT open in a separate window</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function showStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `status ${type}`;
+            element.style.display = 'block';
+        }
+
+        async function testMessagePassing() {
+            showStatus('message-status', 'Testing message passing...', 'info');
+            
+            try {
+                if (typeof chrome !== 'undefined' && chrome.runtime) {
+                    chrome.runtime.sendMessage({
+                        action: 'ping'
+                    }, (response) => {
+                        if (chrome.runtime.lastError) {
+                            showStatus('message-status', `❌ Error: ${chrome.runtime.lastError.message}`, 'error');
+                        } else {
+                            showStatus('message-status', '✅ Message passing works!', 'success');
+                        }
+                    });
+                } else {
+                    showStatus('message-status', '❌ Chrome extension API not available', 'error');
+                }
+            } catch (error) {
+                showStatus('message-status', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testTabCreation() {
+            showStatus('tab-status', 'Testing tab creation...', 'info');
+            
+            const testHTML = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>🏠 Test Extraction Results</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+                        .container { background: white; padding: 30px; border-radius: 15px; }
+                        h1 { color: #e31837; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h1>🏠 Test Extraction Results</h1>
+                        <p>✅ This tab was created successfully!</p>
+                        <p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
+                        <p><strong>Test:</strong> Tab creation functionality</p>
+                    </div>
+                </body>
+                </html>
+            `;
+
+            try {
+                if (typeof chrome !== 'undefined' && chrome.runtime) {
+                    chrome.runtime.sendMessage({
+                        action: 'openDataInNewTab',
+                        data: {
+                            htmlContent: testHTML,
+                            title: 'Test Extraction Results'
+                        }
+                    }, (response) => {
+                        if (chrome.runtime.lastError) {
+                            showStatus('tab-status', `❌ Error: ${chrome.runtime.lastError.message}`, 'error');
+                        } else if (response && response.success) {
+                            showStatus('tab-status', `✅ Tab created successfully! Tab ID: ${response.tabId}`, 'success');
+                        } else {
+                            showStatus('tab-status', `❌ Tab creation failed: ${response?.error || 'Unknown error'}`, 'error');
+                        }
+                    });
+                } else {
+                    showStatus('tab-status', '❌ Chrome extension API not available', 'error');
+                }
+            } catch (error) {
+                showStatus('tab-status', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testFullExtraction() {
+            showStatus('extraction-status', 'Testing full extraction flow...', 'info');
+            
+            // Simulate extraction data
+            const mockData = {
+                success: true,
+                data: {
+                    agent: {
+                        name: 'John Test Agent',
+                        experience: '5 years',
+                        rating: 4.8,
+                        bio: 'A test agent for demonstration purposes.'
+                    },
+                    contact: {
+                        phone: '(555) 123-4567',
+                        email: 'john@testrealty.com'
+                    },
+                    office: {
+                        name: 'Test Realty Group',
+                        address: '123 Test Street, Test City, TC 12345'
+                    },
+                    listings: {
+                        active: [
+                            { price: '$500,000', address: '456 Test Ave', beds: 3, baths: 2 }
+                        ],
+                        sold: [
+                            { price: '$475,000', address: '789 Test Blvd', beds: 2, baths: 1 }
+                        ]
+                    },
+                    reviews: {
+                        overall: { rating: 4.8, count: 25 },
+                        recommendations: [
+                            { text: 'Great agent, very professional!', author: 'Test Client 1' }
+                        ]
+                    }
+                },
+                database: { success: true },
+                timestamp: new Date().toISOString()
+            };
+
+            try {
+                // Simulate the forceOpenDataWindow function call
+                if (typeof window.RealtorDataExtractor !== 'undefined' && window.extractorInstance) {
+                    window.extractorInstance.forceOpenDataWindow(mockData);
+                    showStatus('extraction-status', '✅ Extraction test initiated! Check for new tab.', 'success');
+                } else {
+                    showStatus('extraction-status', '❌ Extractor not loaded. Please visit a realtor.com page first.', 'error');
+                }
+            } catch (error) {
+                showStatus('extraction-status', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run a basic test when page loads
+        window.addEventListener('load', () => {
+            console.log('🧪 Tab opening test page loaded');
+            
+            // Check if extension is available
+            if (typeof chrome !== 'undefined' && chrome.runtime) {
+                console.log('✅ Chrome extension API detected');
+            } else {
+                console.log('❌ Chrome extension API not available');
+            }
+        });
+    </script>
+</body>
+</html>

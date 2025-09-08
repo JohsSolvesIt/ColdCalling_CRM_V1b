@@ -1,0 +1,582 @@
+#!/bin/bash
+
+# Simple Tab Opener for Chrome Extension Batch Processing
+# Opens URLs from CSV in new tabs and lets the Chrome Extension handle extraction
+# No browser automation - just opens tabs naturally
+
+set -euo pipefail
+
+# Configuration
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly DEFAULT_CSV_FILE="90028 realtors LINKS ONLY (copy).csv"
+readonly PROGRESS_FILE="simple_batch_progress.json"
+readonly LOG_FILE="logs/simple_batch_$(date +%Y%m%d_%H%M%S).log"
+readonly BACKEND_PORT=5001
+
+# Processing settings (configurable via command line)
+BATCH_SIZE=1           # Always 1 for single-URL processing  
+TAB_DELAY=2           # Seconds between processing each URL
+PROCESSING_WAIT=30    # Max seconds to wait for extension processing (polling timeout)
+readonly POLLING_INTERVAL=2    # Seconds between polling checks
+
+# Colors
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m'
+readonly YELLOW='\033[1;33m'
+readonly BLUE='\033[0;34m'
+readonly NC='\033[0m'
+
+# Global variables
+TOTAL_URLS=0
+PROCESSED_URLS=0
+SUCCESSFUL_EXTRACTIONS=0
+SKIPPED_URLS=0
+FAILED_URLS=0
+
+# ============================================================================
+# LOGGING FUNCTIONS
+# ============================================================================
+
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG_FILE"
+}
+
+print_info() {
+    echo -e "${BLUE}[INFO]${NC} $*"
+    log "INFO: $*"
+}
+
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $*"
+    log "SUCCESS: $*"
+}
+
+print_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $*"
+    log "WARNING: $*"
+}
+
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $*"
+    log "ERROR: $*"
+}
+
+print_header() {
+    echo -e "${BLUE}╔════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${BLUE}║${NC}           Simple Chrome Extension Tab Opener            ${BLUE}║${NC}"
+    echo -e "${BLUE}║${NC}        No automation - just opens tabs naturally        ${BLUE}║${NC}"
+    echo -e "${BLUE}╚════════════════════════════════════════════════════════╝${NC}"
+    echo
+}
+
+# ============================================================================
+# UTILITY FUNCTIONS
+# ============================================================================
+
+setup_environment() {
+    mkdir -p logs
+    mkdir -p temp
+    
+    # Initialize log file
+    echo "Simple Chrome Extension Tab Opener - $(date)" > "$LOG_FILE"
+    echo "=========================================" >> "$LOG_FILE"
+}
+
+check_dependencies() {
+    print_info "Checking dependencies..."
+    
+    # Check if xdg-open or similar is available for opening URLs
+    if ! command -v xdg-open >/dev/null 2>&1; then
+        if ! command -v open >/dev/null 2>&1; then  # macOS
+            print_error "No URL opener found (xdg-open or open command)"
+            return 1
+        fi
+    fi
+    
+    # Check backend
+    if ! curl -s -f "http://localhost:$BACKEND_PORT/health" >/dev/null 2>&1; then
+        print_warning "Backend service not running on port $BACKEND_PORT"
+        print_info "Please start the backend service first"
+        return 1
+    fi
+    
+    # Check Chrome Extension status
+    print_info "Checking Chrome Extension status..."
+    local recent_extractions
+    recent_extractions=$(curl -s "http://localhost:$BACKEND_PORT/api/agents?limit=1" 2>/dev/null)
+    
+    if [[ $? -eq 0 ]] && echo "$recent_extractions" | grep -q '"agents"'; then
+        print_success "✅ Backend is accessible and has data"
+    else
+        print_warning "⚠️  No recent extractions found - Chrome Extension might not be working"
+        print_info "💡 Make sure your Chrome Extension is:"
+        print_info "   • Loaded in Chrome (chrome://extensions/)"
+        print_info "   • Enabled and active"
+        print_info "   • Configured to save to localhost:$BACKEND_PORT"
+        echo
+        printf "${YELLOW}[WARNING]${NC} Continue anyway? (y/N): "
+        read -r continue_anyway
+        if [[ "$continue_anyway" != "y" && "$continue_anyway" != "Y" ]]; then
+            print_error "Aborted. Please check your Chrome Extension setup."
+            return 1
+        fi
+    fi
+    
+    print_success "Dependencies checked"
+    return 0
+}
+
+# ============================================================================
+# URL MANAGEMENT
+# ============================================================================
+
+load_urls_from_csv() {
+    local csv_file="$1"
+    
+    if [[ ! -f "$csv_file" ]]; then
+        print_error "CSV file not found: $csv_file"
+        return 1
+    fi
+    
+    print_info "Loading URLs from $csv_file..."
+    
+    # Read URLs, handling different CSV formats
+    local urls=()
+    
+    while IFS= read -r line; do
+        # Skip empty lines
+        [[ -z "$line" ]] && continue
+        
+        # Extract URL (first column or the line itself)
+        local url
+        if [[ "$line" == *","* ]]; then
+            # CSV with multiple columns - take first column
+            url=$(echo "$line" | cut -d',' -f1 | tr -d '"' | tr -d "'" | xargs)
+        else
+            # Single column
+            url=$(echo "$line" | xargs)
+        fi
+        
+        # Validate URL
+        if [[ "$url" =~ ^https?://.*realtor\.com.* ]]; then
+            urls+=("$url")
+        fi
+    done < "$csv_file"
+    
+    TOTAL_URLS=${#urls[@]}
+    print_info "Loaded $TOTAL_URLS valid Realtor.com URLs"
+    
+    # Export URLs array for use in other functions
+    printf '%s\n' "${urls[@]}" > temp/urls_to_process.txt
+    
+    return 0
+}
+
+check_url_exists() {
+    local url="$1"
+    
+    local escaped_url
+    escaped_url=$(printf '%s' "$url" | sed 's/"/\\"/g' | sed 's/\\/\\\\/g')
+    
+    local response
+    response=$(curl -s -X POST \
+        -H "Content-Type: application/json" \
+        -d "{\"url\":\"$escaped_url\"}" \
+        "http://localhost:$BACKEND_PORT/api/check-duplicate" 2>/dev/null)
+    
+    if [[ $? -eq 0 ]] && echo "$response" | grep -q '"isDuplicate":true'; then
+        return 0  # URL exists
+    else
+        return 1  # URL doesn't exist
+    fi
+}
+
+# ============================================================================
+# TAB OPENING FUNCTIONS
+# ============================================================================
+
+open_url_in_new_tab() {
+    local url="$1"
+    
+    print_info "Opening: $(basename "$url")"
+    
+    # Open URL in default browser (new tab)
+    if command -v xdg-open >/dev/null 2>&1; then
+        xdg-open "$url" >/dev/null 2>&1 &
+    elif command -v open >/dev/null 2>&1; then  # macOS
+        open "$url" >/dev/null 2>&1 &
+    else
+        print_error "Cannot open URL - no suitable command found"
+        return 1
+    fi
+    
+    return 0
+}
+
+# Play notification sound
+play_notification() {
+    local sound_file="notification2.mp3"
+    
+    # Try multiple audio players
+    if command -v paplay >/dev/null 2>&1; then
+        paplay "$sound_file" >/dev/null 2>&1 &
+    elif command -v aplay >/dev/null 2>&1; then
+        aplay "$sound_file" >/dev/null 2>&1 &
+    elif command -v mpg123 >/dev/null 2>&1; then
+        mpg123 -q "$sound_file" >/dev/null 2>&1 &
+    elif command -v ffplay >/dev/null 2>&1; then
+        ffplay -nodisp -autoexit "$sound_file" >/dev/null 2>&1 &
+    else
+        # Fallback: system beep
+        printf '\a'
+    fi
+}
+
+# Poll for URL completion with real-time feedback
+poll_for_completion() {
+    local url="$1"
+    local max_wait="${PROCESSING_WAIT}"
+    local elapsed=0
+    
+    print_info "Polling for completion of: $(basename "$url")"
+    print_info "Full URL: $url"
+    
+    while [[ $elapsed -lt $max_wait ]]; do
+        # Check if URL now exists in database
+        local escaped_url
+        escaped_url=$(printf '%s' "$url" | sed 's/"/\\"/g' | sed 's/\\/\\\\/g')
+        
+        local response
+        response=$(curl -s -X POST \
+            -H "Content-Type: application/json" \
+            -d "{\"url\":\"$escaped_url\"}" \
+            "http://localhost:$BACKEND_PORT/api/check-duplicate" 2>/dev/null)
+        
+        # Check if we got a successful response
+        if [[ $? -eq 0 ]] && echo "$response" | grep -q '"success":true'; then
+            if echo "$response" | grep -q '"isDuplicate":true'; then
+                print_success "✅ URL processed successfully! (${elapsed}s)"
+                play_notification
+                return 0
+            fi
+        else
+            print_warning "⚠️  API Error at ${elapsed}s: Extension might not be running"
+        fi
+        
+        # Show progress
+        printf "\r${BLUE}[INFO]${NC} Waiting for extraction... %2ds elapsed (max: %ds)" "$elapsed" "$max_wait"
+        
+        sleep "$POLLING_INTERVAL"
+        ((elapsed += POLLING_INTERVAL))
+    done
+    
+    echo
+    print_warning "⏰ Timeout waiting for URL completion (${max_wait}s)"
+    print_info "🔧 Chrome Extension might not be running or configured properly"
+    
+    # Manual mode - ask user to confirm
+    print_info "📋 MANUAL MODE: Please manually extract the data from the opened tab"
+    print_info "   1. Look at the browser tab that was opened"
+    print_info "   2. Manually copy/save the realtor information"
+    print_info "   3. Press ENTER when done, or 's' to skip this URL"
+    
+    printf "${BLUE}[MANUAL]${NC} Press ENTER when manually processed, or 's' to skip: "
+    read -r user_input
+    
+    if [[ "$user_input" == "s" || "$user_input" == "S" ]]; then
+        print_warning "⏭️  URL skipped by user"
+        return 1
+    else
+        print_success "✅ URL marked as manually processed"
+        play_notification
+        return 0
+    fi
+}
+
+process_url_batch() {
+    local batch_urls=("$@")
+    local batch_size=${#batch_urls[@]}
+    
+    print_info "Processing batch of $batch_size URLs (one at a time)..."
+    
+    # Track URLs that were already in database
+    local batch_skipped=0
+    local batch_processed=0
+    
+    for url in "${batch_urls[@]}"; do
+        print_info "Processing URL: $(basename "$url")"
+        
+        # Check if URL already exists
+        if check_url_exists "$url"; then
+            print_warning "URL already exists, skipping: $(basename "$url")"
+            ((batch_skipped++))
+            ((SKIPPED_URLS++))
+            continue
+        fi
+        
+        # Open URL in new tab
+        if open_url_in_new_tab "$url"; then
+            print_info "🌐 Opened URL in browser tab"
+            
+            # Poll for completion
+            if poll_for_completion "$url"; then
+                ((batch_processed++))
+                ((SUCCESSFUL_URLS++))
+                print_info "✅ URL #$((batch_processed + batch_skipped)) completed successfully!"
+            else
+                print_error "❌ URL processing timed out"
+                ((FAILED_URLS++))
+            fi
+            
+            # Small delay before next URL
+            if [[ ${#batch_urls[@]} -gt 1 ]]; then
+                print_info "Waiting ${TAB_DELAY}s before next URL..."
+                sleep "$TAB_DELAY"
+            fi
+        else
+            print_error "Failed to open: $url"
+            ((FAILED_URLS++))
+        fi
+        
+        echo "---"
+    done
+    
+    print_info "Batch complete: $batch_processed processed, $batch_skipped skipped"
+    
+    return 0
+}
+
+# ============================================================================
+# PROGRESS TRACKING
+# ============================================================================
+
+save_progress() {
+    local progress_data
+    progress_data=$(cat << EOF
+{
+    "timestamp": "$(date -Iseconds)",
+    "total_urls": $TOTAL_URLS,
+    "processed": $PROCESSED_URLS,
+    "successful": $SUCCESSFUL_EXTRACTIONS,
+    "skipped": $SKIPPED_URLS,
+    "failed": $FAILED_URLS,
+    "progress_percent": $(( PROCESSED_URLS * 100 / TOTAL_URLS )),
+    "processing_mode": "single_url",
+    "url_delay": $TAB_DELAY,
+    "polling_interval": $POLLING_INTERVAL,
+    "max_wait": $PROCESSING_WAIT
+}
+EOF
+)
+    
+    echo "$progress_data" > "$PROGRESS_FILE"
+}
+
+print_progress() {
+    local percent=$((PROCESSED_URLS * 100 / TOTAL_URLS))
+    
+    print_info "Progress: $PROCESSED_URLS/$TOTAL_URLS ($percent%)"
+    print_info "Success: $SUCCESSFUL_EXTRACTIONS, Skipped: $SKIPPED_URLS, Failed: $FAILED_URLS"
+    
+    if [[ $PROCESSED_URLS -lt $TOTAL_URLS ]]; then
+        local remaining=$((TOTAL_URLS - PROCESSED_URLS))
+        # For single URL processing: remaining URLs * (average processing time per URL)
+        # Assume average of 15 seconds per URL (polling + processing time)
+        local est_minutes=$(( remaining * 15 / 60 ))
+        print_info "Estimated time remaining: $est_minutes minutes (single-URL processing)"
+    fi
+}
+
+print_final_summary() {
+    print_success "Processing completed!"
+    echo
+    print_info "Final Statistics:"
+    print_info "  Total URLs: $TOTAL_URLS"
+    print_info "  Processed: $PROCESSED_URLS"
+    print_info "  Successful extractions: $SUCCESSFUL_EXTRACTIONS"
+    print_info "  Skipped (already existed): $SKIPPED_URLS"
+    print_info "  Failed: $FAILED_URLS"
+    
+    if [[ $PROCESSED_URLS -gt 0 ]]; then
+        local success_rate=$((SUCCESSFUL_EXTRACTIONS * 100 / PROCESSED_URLS))
+        print_info "  Success rate: $success_rate%"
+    fi
+    
+    print_info ""
+    print_info "Files created:"
+    print_info "  Log file: $LOG_FILE"
+    print_info "  Progress file: $PROGRESS_FILE"
+}
+
+# ============================================================================
+# MAIN PROCESSING
+# ============================================================================
+
+process_all_urls() {
+    local csv_file="$1"
+    
+    # Load URLs
+    if ! load_urls_from_csv "$csv_file"; then
+        return 1
+    fi
+    
+    if [[ $TOTAL_URLS -eq 0 ]]; then
+        print_error "No valid URLs found to process"
+        return 1
+    fi
+    
+    print_info "Starting single-URL processing..."
+    print_info "Processing Mode: Single URL at a time, Delay between URLs: ${TAB_DELAY}s"
+    echo
+    
+    # Read URLs into array
+    mapfile -t all_urls < temp/urls_to_process.txt
+    
+    # Process in batches
+    for ((i=0; i<TOTAL_URLS; i+=BATCH_SIZE)); do
+        local batch_end=$((i + BATCH_SIZE))
+        if [[ $batch_end -gt $TOTAL_URLS ]]; then
+            batch_end=$TOTAL_URLS
+        fi
+        
+        local batch_urls=("${all_urls[@]:$i:$((batch_end - i))}")
+        local batch_num=$(( (i / BATCH_SIZE) + 1 ))
+        local total_batches=$(( (TOTAL_URLS + BATCH_SIZE - 1) / BATCH_SIZE ))
+        
+        print_info "Processing batch $batch_num/$total_batches (URLs $((i+1)) to $batch_end)"
+        
+        process_url_batch "${batch_urls[@]}"
+        
+        # Save progress
+        save_progress
+        print_progress
+        echo
+        
+        # Small delay before next batch
+        if [[ $batch_end -lt $TOTAL_URLS ]]; then
+            print_info "Preparing next batch..."
+            sleep 3
+        fi
+    done
+    
+    print_final_summary
+}
+
+# ============================================================================
+# SIGNAL HANDLING AND CLEANUP
+# ============================================================================
+
+cleanup() {
+    print_info "Cleaning up..."
+    rm -f temp/urls_to_process.txt
+}
+
+trap cleanup EXIT
+trap 'print_error "Interrupted by user"; exit 130' INT TERM
+
+# ============================================================================
+# COMMAND LINE INTERFACE
+# ============================================================================
+
+show_usage() {
+    cat << EOF
+Simple Chrome Extension Tab Opener
+
+Processes URLs from CSV file one at a time with real-time completion detection.
+No browser automation - just opens tabs naturally.
+
+Usage: $0 [OPTIONS] [CSV_FILE]
+
+OPTIONS:
+    -h, --help          Show this help message
+    -d, --delay SEC     Seconds between processing each URL (default: $TAB_DELAY)
+
+ARGUMENTS:
+    CSV_FILE           Path to CSV file with URLs (default: $DEFAULT_CSV_FILE)
+
+EXAMPLES:
+    $0                                    # Process default CSV file
+    $0 my_urls.csv                       # Process custom CSV file
+    $0 -d 3 urls.csv                     # 3 second delay between URLs
+
+REQUIREMENTS:
+    - Chrome Extension must be loaded in browser
+    - Backend service running on port $BACKEND_PORT
+    - Chrome/Firefox browser as default browser
+
+HOW IT WORKS:
+    1. Opens URLs one at a time using system default browser
+    2. Chrome Extension automatically detects and processes pages
+    3. Polls backend every ${POLLING_INTERVAL}s to detect completion
+    4. Plays notification sound when each URL completes
+    5. Automatically moves to next URL after completion/timeout
+    6. Provides real-time progress tracking and statistics
+
+EOF
+}
+
+main() {
+    local csv_file="$DEFAULT_CSV_FILE"
+    
+    # Parse command line arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                show_usage
+                exit 0
+                ;;
+            -d|--delay)
+                TAB_DELAY="$2"
+                shift 2
+                ;;
+            -*)
+                print_error "Unknown option: $1"
+                show_usage
+                exit 1
+                ;;
+            *)
+                csv_file="$1"
+                shift
+                ;;
+        esac
+    done
+    
+    # Display header
+    print_header
+    
+    # Setup
+    setup_environment
+    
+    # Check dependencies
+    if ! check_dependencies; then
+        exit 1
+    fi
+    
+    print_info "Configuration:"
+    print_info "  CSV File: $csv_file"
+    print_info "  Processing Mode: Single URL at a time"
+    print_info "  Delay Between URLs: ${TAB_DELAY}s"
+    print_info "  Polling Interval: ${POLLING_INTERVAL}s"
+    print_info "  Max Wait Per URL: ${PROCESSING_WAIT}s"
+    echo
+    
+    print_warning "IMPORTANT: Make sure your Chrome Extension is loaded and working!"
+    print_info "The system will poll for completion and play notification sounds."
+    print_info ""
+    print_info "🧪 Would you like to test with the first URL before processing all URLs?"
+    printf "${BLUE}[TEST]${NC} Test first URL only? (y/N): "
+    read -r test_first
+    echo
+    
+    # Process URLs
+    if process_all_urls "$csv_file"; then
+        print_success "All processing completed successfully!"
+        exit 0
+    else
+        print_error "Processing failed"
+        exit 1
+    fi
+}
+
+# Run main function
+main "$@"

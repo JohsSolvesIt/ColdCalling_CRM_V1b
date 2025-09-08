@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Viewer Test</title>
+</head>
+<body>
+    <h1>Test the New Data Viewer</h1>
+    <p>This page demonstrates the new data viewer functionality for the Chrome Extension.</p>
+    
+    <button onclick="testDataViewer()">🧪 Test Data Viewer</button>
+    
+    <script>
+        function testDataViewer() {
+            // Sample extracted data
+            const sampleData = {
+                url: "https://www.realtor.com/realestateagents/56d5e56eb5cc660100bc9934",
+                extractedAt: "2025-08-30T01:00:00.000Z",
+                pageType: "agent",
+                agent: {
+                    name: "BJ Ward",
+                    bio: null,
+                    photo: null,
+                    experience: null,
+                    rating: "5.0",
+                    priceRange: "$750K - $800K"
+                },
+                contact: {
+                    phone: "+ (805) 844-9440",
+                    email: null,
+                    website: "http://www.comfortres.com/"
+                },
+                office: {
+                    name: "Owner of Comfort Real Estate",
+                    address: null,
+                    phone: null
+                },
+                reviews: {
+                    overall: {
+                        rating: "5.0",
+                        count: "932"
+                    }
+                },
+                listings: [
+                    {
+                        address: "$789k",
+                        price: "789.00",
+                        bedrooms: null,
+                        bathrooms: null,
+                        square_feet: null,
+                        status: "For Sale"
+                    },
+                    {
+                        address: "$762.9k", 
+                        price: "762.00",
+                        bedrooms: null,
+                        bathrooms: null,
+                        square_feet: null,
+                        status: "For Sale"
+                    }
+                ],
+                specializations: [],
+                areasServed: "",
+                socialMedia: {},
+                images: {
+                    agentPhoto: null,
+                    propertyPhotos: [
+                        "https://ap.rdcpix.com/b61cd10e7995074ef179d47a3939b720l-m2955129449rd-w1024_h720.jpg",
+                        "https://ap.rdcpix.com/557a4f720dc929bf85c8bb1c86ae197bl-m1650856741rd-w1024_h720.jpg"
+                    ]
+                }
+            };
+            
+            openDataViewer(sampleData);
+        }
+        
+        function openDataViewer(data) {
+            // Generate extraction summary
+            const summary = generateExtractionSummary(data);
+            
+            // Create HTML content
+            const htmlContent = generateDataViewerHTML(data, summary);
+            
+            // Open new window
+            const newWindow = window.open('', 'extractedData', 
+                'width=1200,height=800,scrollbars=yes,resizable=yes,toolbar=no,menubar=no');
+            
+            if (newWindow) {
+                newWindow.document.write(htmlContent);
+                newWindow.document.close();
+                console.log('📊 Test data opened in new window');
+            } else {
+                alert('Popup blocked! Please allow popups for this site.');
+            }
+        }
+        
+        function generateExtractionSummary(data) {
+            const summary = {
+                total: 0,
+                extracted: 0,
+                missing: 0,
+                quality: 0,
+                categories: {}
+            };
+
+            const categories = {
+                'Agent Info': data.agent || {},
+                'Contact': data.contact || {},
+                'Office': data.office || {},
+                'Properties': data.listings || [],
+                'Reviews': data.reviews || {},
+                'Specializations': data.specializations || [],
+                'Areas Served': data.areasServed || '',
+                'Social Media': data.socialMedia || {},
+                'Images': data.images || {}
+            };
+
+            Object.entries(categories).forEach(([category, categoryData]) => {
+                const analysis = analyzeCategoryData(categoryData);
+                summary.categories[category] = analysis;
+                summary.total += analysis.total;
+                summary.extracted += analysis.extracted;
+                summary.missing += analysis.missing;
+            });
+
+            summary.quality = summary.total > 0 ? (summary.extracted / summary.total * 100).toFixed(1) : 0;
+            
+            return summary;
+        }
+        
+        function analyzeCategoryData(data) {
+            const analysis = { total: 0, extracted: 0, missing: 0, fields: [] };
+            
+            if (Array.isArray(data)) {
+                analysis.total = 1;
+                analysis.extracted = data.length > 0 ? 1 : 0;
+                analysis.missing = data.length === 0 ? 1 : 0;
+                analysis.fields.push({ name: 'items', value: data.length, status: data.length > 0 ? 'success' : 'missing' });
+            } else if (typeof data === 'object' && data !== null) {
+                Object.entries(data).forEach(([key, value]) => {
+                    analysis.total++;
+                    const hasValue = value !== null && value !== undefined && value !== '' && 
+                                     (Array.isArray(value) ? value.length > 0 : true);
+                    
+                    if (hasValue) {
+                        analysis.extracted++;
+                        analysis.fields.push({ name: key, value: value, status: 'success' });
+                    } else {
+                        analysis.missing++;
+                        analysis.fields.push({ name: key, value: 'Not extracted', status: 'missing' });
+                    }
+                });
+            } else {
+                analysis.total = 1;
+                const hasValue = data !== null && data !== undefined && data !== '';
+                analysis.extracted = hasValue ? 1 : 0;
+                analysis.missing = hasValue ? 0 : 1;
+                analysis.fields.push({ name: 'value', value: data || 'Not extracted', status: hasValue ? 'success' : 'missing' });
+            }
+            
+            return analysis;
+        }
+        
+        function formatFieldValue(value) {
+            if (value === null || value === undefined || value === '') {
+                return 'Not extracted';
+            }
+            
+            if (Array.isArray(value)) {
+                return value.length + ' items';
+            }
+            
+            if (typeof value === 'object') {
+                return 'Object data';
+            }
+            
+            if (typeof value === 'string' && value.length > 100) {
+                return value.substring(0, 100) + '...';
+            }
+            
+            return String(value);
+        }
+        
+        // Include the HTML generation function from the extension
+        function generateDataViewerHTML(data, summary) {
+            return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realtor Data Extraction Results</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #e31837, #c41230);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 { font-size: 24px; margin-bottom: 10px; }
+        .header .url { opacity: 0.9; font-size: 14px; }
+        
+        .summary {
+            background: white;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            border-left: 4px solid;
+        }
+        
+        .stat-card.success { border-left-color: #28a745; }
+        .stat-card.warning { border-left-color: #ffc107; }
+        .stat-card.danger { border-left-color: #dc3545; }
+        
+        .stat-value { font-size: 24px; font-weight: bold; margin-bottom: 5px; }
+        .stat-label { color: #666; font-size: 14px; }
+        
+        .quality-meter {
+            background: #e9ecef;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .quality-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn:hover { transform: translateY(-1px); }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        
+        .content {
+            margin: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 1024px) {
+            .content { grid-template-columns: 1fr; }
+        }
+        
+        .category-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .category-header {
+            background: #f8f9fa;
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .category-title { font-weight: 600; }
+        
+        .category-score {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .score-high { background: #d4edda; color: #155724; }
+        .score-medium { background: #fff3cd; color: #856404; }
+        .score-low { background: #f8d7da; color: #721c24; }
+        
+        .category-content {
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .field-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f1f1;
+        }
+        
+        .field-item:last-child { border-bottom: none; }
+        
+        .field-name {
+            font-weight: 500;
+            color: #495057;
+            min-width: 120px;
+        }
+        
+        .field-value {
+            flex: 1;
+            text-align: right;
+            margin-left: 10px;
+            word-break: break-word;
+        }
+        
+        .field-value.success { color: #28a745; }
+        .field-value.missing { color: #dc3545; font-style: italic; }
+        
+        .raw-json {
+            background: white;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .raw-json-header {
+            background: #f8f9fa;
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 600;
+        }
+        
+        .raw-json-content {
+            padding: 0;
+            max-height: 600px;
+            overflow: auto;
+        }
+        
+        pre {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 0;
+            font-size: 12px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Realtor Data Extraction Results (TEST)</h1>
+        <div class="url">\${data.url || 'Unknown URL'}</div>
+        <div style="margin-top: 10px; font-size: 14px;">
+            Extracted: \${new Date(data.extractedAt || Date.now()).toLocaleString()}
+        </div>
+    </div>
+
+    <div class="summary">
+        <div class="summary-stats">
+            <div class="stat-card success">
+                <div class="stat-value">\${summary.extracted}</div>
+                <div class="stat-label">Fields Extracted</div>
+            </div>
+            <div class="stat-card danger">
+                <div class="stat-value">\${summary.missing}</div>
+                <div class="stat-label">Fields Missing</div>
+            </div>
+            <div class="stat-card \${summary.quality >= 70 ? 'success' : summary.quality >= 40 ? 'warning' : 'danger'}">
+                <div class="stat-value">\${summary.quality}%</div>
+                <div class="stat-label">Data Quality</div>
+            </div>
+            <div class="stat-card info">
+                <div class="stat-value">\${Object.keys(summary.categories).length}</div>
+                <div class="stat-label">Categories</div>
+            </div>
+        </div>
+        
+        <div class="quality-meter">
+            <div class="quality-fill" style="width: \${summary.quality}%; background: \${summary.quality >= 70 ? '#28a745' : summary.quality >= 40 ? '#ffc107' : '#dc3545'}"></div>
+        </div>
+        
+        <div class="actions">
+            <button class="btn btn-primary" onclick="copyToClipboard('json')">📋 Copy JSON</button>
+            <button class="btn btn-success" onclick="downloadData('json')">💾 Download JSON</button>
+            <button class="btn btn-info" onclick="downloadData('csv')">📊 Download CSV</button>
+            <button class="btn btn-secondary" onclick="toggleRawData()">🔍 Toggle Raw Data</button>
+        </div>
+    </div>
+
+    <div class="content">
+        \${Object.entries(summary.categories).map(([category, analysis]) => \`
+            <div class="category-card">
+                <div class="category-header">
+                    <div class="category-title">\${category}</div>
+                    <div class="category-score \${analysis.extracted / analysis.total >= 0.7 ? 'score-high' : analysis.extracted / analysis.total >= 0.4 ? 'score-medium' : 'score-low'}">
+                        \${analysis.extracted}/\${analysis.total}
+                    </div>
+                </div>
+                <div class="category-content">
+                    \${analysis.fields.map(field => \`
+                        <div class="field-item">
+                            <div class="field-name">\${field.name}</div>
+                            <div class="field-value \${field.status}">
+                                \${formatFieldValue(field.value)}
+                            </div>
+                        </div>
+                    \`).join('')}
+                </div>
+            </div>
+        \`).join('')}
+    </div>
+
+    <div class="raw-json" id="rawJson" style="display: none;">
+        <div class="raw-json-header">🔍 Raw JSON Data</div>
+        <div class="raw-json-content">
+            <pre>\${JSON.stringify(data, null, 2)}</pre>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        const extractedData = \${JSON.stringify(data, null, 2)};
+        
+        function copyToClipboard(format) {
+            const text = format === 'json' ? JSON.stringify(extractedData, null, 2) : 'CSV conversion not implemented in test';
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('Data copied to clipboard!');
+            });
+        }
+        
+        function downloadData(format) {
+            const filename = 'realtor-data-' + Date.now() + '.' + format;
+            const content = format === 'json' ? JSON.stringify(extractedData, null, 2) : 'CSV conversion not implemented in test';
+            const blob = new Blob([content], { type: format === 'json' ? 'application/json' : 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+            showNotification('File downloaded: ' + filename);
+        }
+        
+        function toggleRawData() {
+            const rawJson = document.getElementById('rawJson');
+            rawJson.style.display = rawJson.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>\`;
+        }
+    </script>
+</body>
+</html>

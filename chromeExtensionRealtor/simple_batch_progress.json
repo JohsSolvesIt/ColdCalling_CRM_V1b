@@ -1,0 +1,13 @@
+{
+    "timestamp": "2025-09-03T15:20:09-04:00",
+    "total_urls": 189,
+    "processed": 189,
+    "successful": 189,
+    "skipped": 0,
+    "failed": 0,
+    "progress_percent": 100,
+    "processing_mode": "single_url",
+    "url_delay": 2,
+    "polling_interval": 2,
+    "max_wait": 300
+}

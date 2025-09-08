@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AgentExtractor Test</title>
+</head>
+<body>
+    <h1>AgentExtractor Loading Test</h1>
+    <div id="results"></div>
+
+    <!-- Load the same scripts as in manifest.json -->
+    <script src="modules/core/logging-utils.js"></script>
+    <script src="modules/core/polling-manager.js"></script>
+    <script src="modules/extractors/contact-extractor.js"></script>
+    <script src="modules/extractors/reviews-extractor.js"></script>
+    <script src="modules/extractors/listings-extractor.js"></script>
+    <script src="modules/extractors/bio-extractor.js"></script>
+    <script src="modules/extractors/photo-extractor.js"></script>
+    <script src="modules/extractors/agent-extractor.js"></script>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        // Test if AgentExtractor is available
+        results.innerHTML += '<p>AgentExtractor available: ' + (!!window.AgentExtractor) + '</p>';
+        
+        if (window.AgentExtractor) {
+            results.innerHTML += '<p>AgentExtractor methods: ' + Object.getOwnPropertyNames(window.AgentExtractor).join(', ') + '</p>';
+        } else {
+            results.innerHTML += '<p>Available window objects with "Extract": ' + Object.keys(window).filter(k => k.includes('Extract')).join(', ') + '</p>';
+        }
+    </script>
+</body>
+</html>

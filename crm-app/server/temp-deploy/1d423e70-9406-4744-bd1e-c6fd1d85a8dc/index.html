@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rick McDowell - Luxury Real Estate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #ffffff;
+            color: #000000;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation - Fixed Header */
+        .navigation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .agent-name {
+            font-size: 24px;
+            font-weight: 600;
+            color: #000000;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        /* Hero Section - Full Screen */
+        .hero {
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            z-index: 2;
+            position: relative;
+        }
+
+        .hero-title {
+            font-size: 96px;
+            font-weight: 300;
+            letter-spacing: 6px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            color: #000000;
+            line-height: 1.1;
+        }
+
+        .hero-subtitle {
+            font-size: 18px;
+            font-weight: 400;
+            letter-spacing: 4px;
+            margin-bottom: 60px;
+            text-transform: uppercase;
+            color: #666666;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin-bottom: 80px;
+        }
+
+        .hero-btn {
+            padding: 20px 40px;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            border: 2px solid #000000;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .hero-btn.primary {
+            background: #000000;
+            color: #ffffff;
+        }
+
+        .hero-btn.primary:hover {
+            background: transparent;
+            color: #000000;
+        }
+
+        .hero-btn.secondary {
+            background: transparent;
+            color: #000000;
+        }
+
+        .hero-btn.secondary:hover {
+            background: #000000;
+            color: #ffffff;
+        }
+
+        /* Agent Introduction */
+        .introduction {
+            padding: 120px 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 72px;
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+            color: #000000;
+        }
+
+        .introduction-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+            margin-top: 80px;
+        }
+
+        @media (max-width: 1200px) {
+            .introduction-content {
+                grid-template-columns: 1fr 1fr;
+                gap: 60px;
+            }
+        }
+
+        .intro-text {
+            text-align: left;
+        }
+
+        .intro-description {
+            font-size: 20px;
+            line-height: 1.8;
+            color: #333333;
+            margin-bottom: 40px;
+        }
+
+        .intro-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 30px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 600;
+            color: #000000;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            font-weight: 400;
+            color: #666666;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .agent-image {
+            width: 100%;
+            height: 600px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        @media (max-width: 1200px) {
+            .agent-image {
+                height: 450px;
+            }
+        }
+
+        .agent-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .agent-image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666666;
+            font-size: 16px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+        }
+
+        /* Portfolio Section */
+        .portfolio {
+            background: #f8fafc;
+            padding: 120px 40px;
+        }
+
+        .portfolio-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .portfolio-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .portfolio-subtitle {
+            font-size: 18px;
+            color: #666666;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .property-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+        }
+
+        .property-card {
+            background: #ffffff;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .property-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .property-image {
+            height: 300px;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666666;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .property-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .property-status {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #000000;
+            color: #ffffff;
+            padding: 8px 16px;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .property-info {
+            padding: 40px;
+        }
+
+        .property-price {
+            font-size: 32px;
+            font-weight: 600;
+            color: #000000;
+            margin-bottom: 15px;
+        }
+
+        .property-address {
+            font-size: 24px;
+            font-weight: 500;
+            color: #000000;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .property-location {
+            font-size: 16px;
+            color: #666666;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .property-details {
+            font-size: 14px;
+            color: #666666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Testimonials Section */
+        .testimonials {
+            padding: 120px 40px;
+        }
+
+        .testimonials-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .testimonial-content {
+            max-width: 800px;
+            margin: 80px auto 0;
+        }
+
+        .testimonial-quote {
+            font-size: 24px;
+            line-height: 1.6;
+            color: #333333;
+            font-style: italic;
+            margin-bottom: 40px;
+        }
+
+        .testimonial-author {
+            font-size: 14px;
+            font-weight: 600;
+            color: #000000;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Contact Section */
+        .contact {
+            background: #000000;
+            color: #ffffff;
+            padding: 120px 40px;
+        }
+
+        .contact-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .contact-title {
+            font-size: 72px;
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+            color: #ffffff;
+        }
+
+        .contact-subtitle {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 80px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .contact-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 60px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .contact-item {
+            text-align: center;
+        }
+
+        .contact-label {
+            font-size: 12px;
+            font-weight: 400;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-bottom: 15px;
+        }
+
+        .contact-value {
+            font-size: 18px;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .contact-value a {
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        /* Footer */
+        .footer {
+            background: #000000;
+            color: #ffffff;
+            padding: 40px;
+            text-align: center;
+            border-top: 1px solid #333333;
+        }
+
+        .footer-text {
+            font-size: 12px;
+            opacity: 0.7;
+            letter-spacing: 1px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 48px;
+                letter-spacing: 3px;
+            }
+
+            .section-title {
+                font-size: 36px;
+                letter-spacing: 2px;
+            }
+
+            .contact-title {
+                font-size: 36px;
+                letter-spacing: 2px;
+            }
+
+            .introduction-content {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .agent-image {
+                height: 350px;
+                margin-top: 20px;
+            }
+
+            .property-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-info {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .nav-container {
+                padding: 0 20px;
+            }
+        }
+
+        /* Tablet styles (768px - 1024px) */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .hero-title {
+                font-size: 84px;
+            }
+            
+            .intro-container {
+                grid-template-columns: 1fr;
+                gap: 60px;
+                text-align: center;
+            }
+            
+            .intro-stats {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 20px;
+            }
+            
+            .agent-image {
+                height: 400px;
+            }
+            
+            .portfolio-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 30px;
+            }
+            
+            .contact-info {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 30px;
+            }
+            
+            .hero-container,
+            .intro-container,
+            .portfolio-container,
+            .testimonial-container,
+            .contact-container {
+                padding: 0 30px;
+            }
+        }
+
+        /* Mobile styles (up to 768px) */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 48px;
+                line-height: 1.1;
+                margin-bottom: 20px;
+            }
+            
+            .hero-subtitle {
+                font-size: 18px;
+                margin-bottom: 30px;
+            }
+            
+            .hero-description {
+                font-size: 16px;
+                margin-bottom: 40px;
+            }
+            
+            .section-title {
+                font-size: 36px;
+                line-height: 1.2;
+                margin-bottom: 30px;
+            }
+            
+            .intro-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                margin-top: 60px;
+                text-align: center;
+            }
+            
+            .intro-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+            
+            .stat-item {
+                padding: 20px;
+            }
+            
+            .stat-value {
+                font-size: 28px;
+            }
+            
+            .portfolio-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .testimonial-quote {
+                font-size: 20px;
+                line-height: 1.4;
+                margin-bottom: 30px;
+            }
+            
+            .contact-info {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .contact-item {
+                padding: 25px 20px;
+            }
+            
+            .contact-title {
+                font-size: 32px;
+                margin-bottom: 20px;
+            }
+            
+            .hero-container,
+            .intro-container,
+            .portfolio-container,
+            .testimonial-container,
+            .contact-container {
+                padding: 0 20px;
+            }
+            
+            .intro,
+            .portfolio,
+            .testimonial,
+            .contact {
+                padding: 80px 0;
+            }
+            
+            .navigation {
+                padding: 15px 0;
+            }
+            
+            .agent-name {
+                font-size: 20px;
+            }
+        }
+
+        /* Small mobile styles (up to 480px) */
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 36px;
+            }
+            
+            .section-title {
+                font-size: 28px;
+            }
+            
+            .intro-stats {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .agent-image {
+                height: 250px;
+            }
+            
+            .stat-item {
+                padding: 15px;
+            }
+            
+            .testimonial-quote {
+                font-size: 18px;
+            }
+            
+            .contact-item {
+                padding: 20px 15px;
+            }
+            
+            .hero-container,
+            .intro-container,
+            .portfolio-container,
+            .testimonial-container,
+            .contact-container {
+                padding: 0 15px;
+            }
+            
+            .intro,
+            .portfolio,
+            .testimonial,
+            .contact {
+                padding: 60px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navigation">
+        <div class="nav-container">
+            <div class="agent-name">Rick McDowell</div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Rick McDowell</h1>
+            <p class="hero-subtitle">SERVING Local Area AND SURROUNDING AREAS</p>
+            <div class="hero-buttons">
+                <a href="#portfolio" class="hero-btn primary">SEARCH PROPERTIES</a>
+                <a href="#contact" class="hero-btn secondary">HOME VALUATION</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Introduction Section -->
+    <section class="introduction">
+        <h2 class="section-title">MEET<br>Rick McDowell</h2>
+        
+        <div class="introduction-content">
+            <div class="intro-text">
+                <p class="intro-description">
+                    A licensed Real Estate professional specializing in luxury properties throughout Local Area. 
+                    Known for unwavering professionalism, market expertise, and resolute work ethic.
+                </p>
+                
+                <div class="intro-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">10</div>
+                        <div class="stat-label">PROPERTIES LISTED</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">$535K</div>
+                        <div class="stat-label">AVERAGE PRICE</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">$120K - $875K</div>
+                        <div class="stat-label">PRICE RANGE</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">10+</div>
+                        <div class="stat-label">YEARS EXPERIENCE</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="agent-image">
+                <img src="https://ap.rdcpix.com/2055602849/ea8eaf92583b364c6ec02a746a684925g-c0rd-w1024_h768.webp" alt="Rick McDowell - Professional Headshot" loading="lazy" 
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                     onload="this.nextElementSibling.style.display='none';">
+                <div class="agent-image-placeholder" style="display: flex;">
+                    PROFESSIONAL HEADSHOT<br>
+                    <small style="font-size: 12px; margin-top: 10px;">Rick McDowell</small>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section class="portfolio" id="portfolio">
+        <div class="portfolio-container">
+            <div class="portfolio-header">
+                <p class="portfolio-subtitle">PORTFOLIO</p>
+                <h2 class="section-title">RECENT SALES</h2>
+            </div>
+            
+            <div class="portfolio-grid">
+                <!-- Property cards will be dynamically generated from real data -->
+                
+      <div class="property-card">
+        <div class="property-image">
+          <img src="https://ap.rdcpix.com/7fcb264d75f909e675f338d6c0480089l-m3712611905rd-w1024.webp" alt="33962 Church Rd, Warren, OR 97053" loading="lazy">
+          <div class="property-status">Available</div>
+        </div>
+        <div class="property-info">
+          <div class="property-price">$448,000</div>
+          <div class="property-address">33962 Church Rd, Warren, OR 97053</div>
+          <div class="property-location">Location Available</div>
+          <div class="property-details">
+            <span>N/A bed</span> • 
+            <span>N/A bath</span> • 
+            <span>N/A sqft</span>
+          </div>
+        </div>
+      </div>
+    
+      <div class="property-card">
+        <div class="property-image">
+          <img src="https://ap.rdcpix.com/401071c2a3c3fff6beb93b795aebe1c5l-m3078238872rd-w1024.webp" alt="28315 Mateer Rd, Gold Beach, OR 97444" loading="lazy">
+          <div class="property-status">Available</div>
+        </div>
+        <div class="property-info">
+          <div class="property-price">$120,000</div>
+          <div class="property-address">28315 Mateer Rd, Gold Beach, OR 97444</div>
+          <div class="property-location">Location Available</div>
+          <div class="property-details">
+            <span>N/A bed</span> • 
+            <span>N/A bath</span> • 
+            <span>N/A sqft</span>
+          </div>
+        </div>
+      </div>
+    
+      <div class="property-card">
+        <div class="property-image">
+          <img src="https://ap.rdcpix.com/cf4c812545e71de6f43661b68453740fl-m1512147308rd-w1024.webp" alt="319 NW Angela Ln, Hillsboro, OR 97124" loading="lazy">
+          <div class="property-status">Available</div>
+        </div>
+        <div class="property-info">
+          <div class="property-price">$494,900</div>
+          <div class="property-address">319 NW Angela Ln, Hillsboro, OR 97124</div>
+          <div class="property-location">Location Available</div>
+          <div class="property-details">
+            <span>N/A bed</span> • 
+            <span>N/A bath</span> • 
+            <span>N/A sqft</span>
+          </div>
+        </div>
+      </div>
+    
+      <div class="property-card">
+        <div class="property-image">
+          <img src="https://ap.rdcpix.com/30ec88a132ca4277bfee3bc2566f6048l-m359169673rd-w1024.webp" alt="16706 NW Waterford Way, Portland, OR 97229" loading="lazy">
+          <div class="property-status">Available</div>
+        </div>
+        <div class="property-info">
+          <div class="property-price">$875,000</div>
+          <div class="property-address">16706 NW Waterford Way, Portland, OR 97229</div>
+          <div class="property-location">Location Available</div>
+          <div class="property-details">
+            <span>N/A bed</span> • 
+            <span>N/A bath</span> • 
+            <span>N/A sqft</span>
+          </div>
+        </div>
+      </div>
+    
+      <div class="property-card">
+        <div class="property-image">
+          <img src="https://ap.rdcpix.com/27ae6732647c26138c465538eea17229l-m4018462815rd-w1024.webp" alt="16042 Cornell St, Lake Oswego, OR 97034" loading="lazy">
+          <div class="property-status">Available</div>
+        </div>
+        <div class="property-info">
+          <div class="property-price">$599,900</div>
+          <div class="property-address">16042 Cornell St, Lake Oswego, OR 97034</div>
+          <div class="property-location">Location Available</div>
+          <div class="property-details">
+            <span>N/A bed</span> • 
+            <span>N/A bath</span> • 
+            <span>N/A sqft</span>
+          </div>
+        </div>
+      </div>
+    
+      <div class="property-card">
+        <div class="property-image">
+          <img src="https://ap.rdcpix.com/01370d46bf6e5f83819002bdf7c86eb9l-m2885115383rd-w1024.webp" alt="8311 Greenann Ct, Gladstone, OR 97027" loading="lazy">
+          <div class="property-status">Available</div>
+        </div>
+        <div class="property-info">
+          <div class="property-price">$689,900</div>
+          <div class="property-address">8311 Greenann Ct, Gladstone, OR 97027</div>
+          <div class="property-location">Location Available</div>
+          <div class="property-details">
+            <span>N/A bed</span> • 
+            <span>N/A bath</span> • 
+            <span>N/A sqft</span>
+          </div>
+        </div>
+      </div>
+    
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <div class="testimonials-container">
+            <h2 class="section-title">HAPPY CLIENTS</h2>
+            
+            
+      <style>
+        .testimonial-slide {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          opacity: 0;
+          transition: opacity 1.5s ease-in-out;
+          pointer-events: none;
+        }
+        
+        .testimonial-slide.active {
+          opacity: 1;
+          pointer-events: auto;
+        }
+        
+        .testimonials-container {
+          position: relative;
+          height: 600px;
+        }
+        
+        .testimonial-content {
+          text-align: center;
+          max-width: 800px;
+          margin: 0 auto;
+          padding: 40px 20px;
+        }
+        
+        .testimonial-quote {
+          font-size: 24px;
+          line-height: 1.6;
+          margin-bottom: 30px;
+        }
+        
+        .testimonial-author {
+          font-size: 14px;
+          font-weight: 600;
+          letter-spacing: 2px;
+        }
+        
+        /* Add a subtle slide indicator */
+        .testimonial-indicators {
+          position: absolute;
+          bottom: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          gap: 8px;
+        }
+        
+        .testimonial-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background-color: rgba(0,0,0,0.3);
+          transition: background-color 0.3s ease;
+        }
+        
+        .testimonial-dot.active {
+          background-color: rgba(0,0,0,0.8);
+        }
+      </style>
+      
+      <div class="testimonials-wrapper" style="position: relative;">
+        
+        <div class="testimonial-content testimonial-slide" data-testimonial-index="0" style="opacity: 1;">
+          <div class="testimonial-quote">
+            "We feel that working with Rick has always been very up front and easy. He is direct, honest, and attentive. He was always available to answer questions, got back to us promptly, and seemed invested in the transactions we were making himself. His genuine demeanor, professionalism, and support were unmatched. These qualities held true throughout our time working with him."
+          </div>
+          <div class="testimonial-author">ANONYMOUS</div>
+        </div>
+      
+        <div class="testimonial-content testimonial-slide" data-testimonial-index="1" style="opacity: 0;">
+          <div class="testimonial-quote">
+            "Being a first-time home buyer can be a scary business -- who knows what to ask and what to do? Rick kept me fully informed every step of the way with direct, informative, relevant and sound guidance. Sometimes that guidance came in rapid-fire directions with multiple conversations per day. He additionally worked diligently on my behalf with the lender, the seller, and the necessary inspection vendors. In fact, he rode and motivated the lender to get moving when they were dragging their feet."
+          </div>
+          <div class="testimonial-author">ANONYMOUS</div>
+        </div>
+      
+        <div class="testimonial-content testimonial-slide" data-testimonial-index="2" style="opacity: 0;">
+          <div class="testimonial-quote">
+            "The McDowell Team provided expert and timely service in getting the property ready toshow and then sold."
+          </div>
+          <div class="testimonial-author">MICHAEL</div>
+        </div>
+      
+        <div class="testimonial-content testimonial-slide" data-testimonial-index="3" style="opacity: 0;">
+          <div class="testimonial-quote">
+            "As first time home buyers, the process was intimidating and even daunting at times. TheMcDowell team made the process exciting and helped us every step of the way easingthe anxiety we had."
+          </div>
+          <div class="testimonial-author">ALEXIS</div>
+        </div>
+      
+        <div class="testimonial-content testimonial-slide" data-testimonial-index="4" style="opacity: 0;">
+          <div class="testimonial-quote">
+            "There is so much knowledge, experience, and helpful information from this team. Ireally appreciated the help from their business contacts who were able to address eachissue with the house in a timely manner. Thank you!"
+          </div>
+          <div class="testimonial-author">TOM</div>
+        </div>
+      
+        <div class="testimonial-content testimonial-slide" data-testimonial-index="5" style="opacity: 0;">
+          <div class="testimonial-quote">
+            "Wonderful team who worked together to make the buying process easier."
+          </div>
+          <div class="testimonial-author">ANONYMOUSALMOST</div>
+        </div>
+      
+        <div class="testimonial-content testimonial-slide" data-testimonial-index="6" style="opacity: 0;">
+          <div class="testimonial-quote">
+            "Very professional team and great communications with sellers and buyers."
+          </div>
+          <div class="testimonial-author">DAN</div>
+        </div>
+      
+        <div class="testimonial-content testimonial-slide" data-testimonial-index="7" style="opacity: 0;">
+          <div class="testimonial-quote">
+            "Jimmy and his team were amazing helping us buy our first home! Jimmy remained very patient and optimistic while answering our many questions. They provided pizza for our moving day which was unexpected and much appreciated! I highly recommend!"
+          </div>
+          <div class="testimonial-author">KELSEY</div>
+        </div>
+      
+        <div class="testimonial-content testimonial-slide" data-testimonial-index="8" style="opacity: 0;">
+          <div class="testimonial-quote">
+            "“Wow! Jimmy really went above and beyond to make our home finding mission a success. From the showings to the final move in, every detail was handled impeccably. I have recommended, and will continue to recommend, this team to everyone I know. Thank you so much!”."
+          </div>
+          <div class="testimonial-author">AMELIA</div>
+        </div>
+      
+        <div class="testimonial-content testimonial-slide" data-testimonial-index="9" style="opacity: 0;">
+          <div class="testimonial-quote">
+            "Jimmy was very helpful and easy to work with. It made the process smoother and less stressful due to his knowledge about the local market and experience."
+          </div>
+          <div class="testimonial-author">LOGAN</div>
+        </div>
+      
+      </div>
+      
+      <!-- Testimonial indicators -->
+      <div class="testimonial-indicators">
+        <div class="testimonial-dot active" data-dot="0"></div>
+        <div class="testimonial-dot" data-dot="1"></div>
+        <div class="testimonial-dot" data-dot="2"></div>
+        <div class="testimonial-dot" data-dot="3"></div>
+        <div class="testimonial-dot" data-dot="4"></div>
+        <div class="testimonial-dot" data-dot="5"></div>
+        <div class="testimonial-dot" data-dot="6"></div>
+        <div class="testimonial-dot" data-dot="7"></div>
+        <div class="testimonial-dot" data-dot="8"></div>
+        <div class="testimonial-dot" data-dot="9"></div>
+      </div>
+      
+      <script>
+        (function() {
+          const testimonials = document.querySelectorAll('.testimonial-slide');
+          const indicators = document.querySelectorAll('.testimonial-dot');
+          let currentIndex = 0;
+          const totalTestimonials = testimonials.length;
+          
+          if (totalTestimonials <= 1) return;
+          
+          // Function to get next random index (avoiding the current one)
+          function getNextRandomIndex() {
+            if (totalTestimonials <= 1) return 0;
+            
+            let nextIndex;
+            do {
+              nextIndex = Math.floor(Math.random() * totalTestimonials);
+            } while (nextIndex === currentIndex);
+            
+            return nextIndex;
+          }
+          
+          // Function to show specific testimonial
+          function showTestimonial(index) {
+            // Hide current testimonial
+            if (testimonials[currentIndex]) {
+              testimonials[currentIndex].style.opacity = '0';
+              testimonials[currentIndex].classList.remove('active');
+            }
+            
+            // Update indicators
+            if (indicators[currentIndex]) {
+              indicators[currentIndex].classList.remove('active');
+            }
+            
+            // Show new testimonial
+            currentIndex = index;
+            if (testimonials[currentIndex]) {
+              testimonials[currentIndex].style.opacity = '1';
+              testimonials[currentIndex].classList.add('active');
+            }
+            
+            // Update indicator
+            if (indicators[currentIndex]) {
+              indicators[currentIndex].classList.add('active');
+            }
+            
+            console.log('📝 Showing testimonial', currentIndex + 1, 'of', totalTestimonials);
+          }
+          
+          // Initialize first testimonial
+          if (testimonials[0]) {
+            testimonials[0].style.opacity = '1';
+            testimonials[0].classList.add('active');
+          }
+          
+          // Start rotation after initial delay
+          setInterval(function() {
+            const nextIndex = getNextRandomIndex();
+            showTestimonial(nextIndex);
+          }, 6000); // Slower 6-second intervals for better visibility
+          
+          console.log('🔄 Testimonial rotation initialized with', totalTestimonials, 'reviews - 6 second intervals');
+        })();
+      </script>
+    
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <div class="contact-container">
+            <h2 class="contact-title">WORK WITH<br>Rick McDowell</h2>
+            <p class="contact-subtitle">Representing sellers, buyers, investors and developers</p>
+            
+            <div class="contact-info">
+                <div class="contact-item">
+                    <div class="contact-label">EMAIL</div>
+                    <div class="contact-value">
+                        <a href="mailto:Contact for email">Contact for email</a>
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-label">PHONE NUMBER</div>
+                    <div class="contact-value">
+                        <a href="tel:9717278505">9717278505</a>
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-label">OFFICE</div>
+                    <div class="contact-value">Real Estate Company<br>Local Area</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-text">
+            © 2025 Rick McDowell. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

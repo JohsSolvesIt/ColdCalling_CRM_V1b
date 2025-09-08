@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "SUPER MINIMAL TEST",
+  "version": "1.0",
+  "description": "Ultra minimal test",
+  "permissions": ["activeTab"],
+  "host_permissions": ["*://*.realtor.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["*://*.realtor.com/*"],
+      "js": ["super-minimal.js"],
+      "run_at": "document_end"
+    }
+  ]
+}

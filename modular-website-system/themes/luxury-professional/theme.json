@@ -1,0 +1,71 @@
+{
+  "name": "Luxury Professional",
+  "version": "1.0.0",
+  "description": "Premium luxury real estate theme with full-screen hero, elegant typography, and sophisticated design",
+  "author": "CRM System",
+  "category": "luxury",
+  "preview": "luxury-professional-preview.jpg",
+  "features": [
+    "Full-screen hero section",
+    "Inter font family",
+    "Elegant color scheme",
+    "Professional navigation with backdrop blur",
+    "Smooth animations and transitions",
+    "Perfect responsive design",
+    "Luxury property showcase grid",
+    "Premium testimonial display",
+    "Clean contact section"
+  ],
+  "colors": {
+    "primary": "#000000",
+    "secondary": "#666666", 
+    "background": "#ffffff",
+    "surface": "#f8fafc",
+    "accent": "#e2e8f0",
+    "text": {
+      "primary": "#000000",
+      "secondary": "#666666",
+      "muted": "#999999"
+    }
+  },
+  "typography": {
+    "headings": {
+      "fontFamily": "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+      "fontWeight": "300",
+      "letterSpacing": "3px",
+      "textTransform": "uppercase"
+    },
+    "body": {
+      "fontFamily": "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+      "fontWeight": "400",
+      "lineHeight": "1.6"
+    }
+  },
+  "layout": {
+    "maxWidth": "1400px",
+    "spacing": {
+      "section": "120px",
+      "component": "40px",
+      "card": "30px"
+    }
+  },
+  "animations": {
+    "duration": "0.3s",
+    "easing": "ease",
+    "hover": true,
+    "entrance": true
+  },
+  "responsive": {
+    "breakpoints": {
+      "mobile": "768px",
+      "tablet": "1024px", 
+      "desktop": "1400px"
+    }
+  },
+  "compatibility": {
+    "testimonials": "carousel",
+    "properties": "grid",
+    "hero": "full-screen",
+    "navigation": "fixed"
+  }
+}
