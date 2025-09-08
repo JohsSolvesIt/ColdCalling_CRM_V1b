@@ -598,20 +598,25 @@ app.post('/api/website/preview', (req, res) => {
 app.get('/api/website/themes', (req, res) => {
   try {
     const themes = [
-      // Professional themes
-      { key: 'modern-professional', name: 'Modern Professional', description: 'Clean and contemporary', category: 'professional' },
-      { key: 'classic-business', name: 'Classic Business', description: 'Traditional and trustworthy', category: 'professional' },
-      { key: 'corporate-clean', name: 'Corporate Clean', description: 'Minimal and sophisticated', category: 'professional' },
-      
-      // Creative themes
-      { key: 'artistic-modern', name: 'Artistic Modern', description: 'Creative and expressive', category: 'creative' },
-      { key: 'bold-creative', name: 'Bold Creative', description: 'Eye-catching and unique', category: 'creative' },
-      { key: 'minimalist-design', name: 'Minimalist Design', description: 'Simple and elegant', category: 'creative' },
-      
-      // Luxury themes
-      { key: 'luxury-elegance', name: 'Luxury Elegance', description: 'Premium and refined', category: 'luxury' },
-      { key: 'premium-gold', name: 'Premium Gold', description: 'Luxurious and exclusive', category: 'luxury' },
-      { key: 'sophisticated-dark', name: 'Sophisticated Dark', description: 'Dark and modern', category: 'luxury' }
+      // Professional themes - Only the 3 main themes
+      { 
+        key: 'modern-professional', 
+        name: 'Modern Professional', 
+        description: 'Shannon Lavin inspired luxury real estate theme with sophisticated typography, full-screen hero design, and professional aesthetic perfect for high-end real estate professionals', 
+        category: 'professional' 
+      },
+      { 
+        key: 'luxury-professional', 
+        name: 'Luxury Professional', 
+        description: 'Premium luxury real estate theme with full-screen hero, elegant typography, and sophisticated design', 
+        category: 'luxury' 
+      },
+      { 
+        key: 'inked-estate', 
+        name: 'Inked Estate', 
+        description: 'Professional real estate theme inspired by InkedRealEstate.com featuring blue branding with green action elements', 
+        category: 'professional' 
+      }
     ];
     
     res.json({ 
